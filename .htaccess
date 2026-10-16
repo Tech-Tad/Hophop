@@ -1,0 +1,6 @@
+# HopHop — pas de listage ; data/ et includes/ ont leur propre .htaccess (Require all denied).
+Options -Indexes
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+</IfModule>

@@ -12,7 +12,7 @@ $LOGO_SVG = is_file($logoPath) ? file_get_contents($logoPath) : '';
 <title>HopHop — recettes de bière</title>
 <style>
 /* ==========================================================================
-   HOPHOP — styles
+   HoPHoP — styles
    5 thèmes de couleur (choisis dans Compte → Apparence), appliqués via
    <html data-theme="vert|ambre|ble|myrtille|sombre">. « vert » (par défaut)
    respecte en plus la préférence sombre/claire du système d'exploitation.
@@ -57,27 +57,31 @@ $LOGO_SVG = is_file($logoPath) ? file_get_contents($logoPath) : '';
   --danger:#9c3324; --dangerbg:#fbeee9; --okbg:#e6def2;
 }
 *,*::before,*::after{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 var(--sans);-webkit-text-size-adjust:100%}
-h1,h2,h3{font-family:var(--serif);color:var(--head);margin:0;font-weight:600;letter-spacing:.005em}
+html{max-width:100%;overflow-x:hidden}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 var(--sans);-webkit-text-size-adjust:100%;max-width:100%;overflow-x:hidden}
+#app{max-width:100%;min-width:0;overflow-x:hidden}
+h1,h2,h3{font-family:var(--serif);color:var(--head);margin:0;font-weight:600;letter-spacing:.005em;overflow-wrap:anywhere}
 h1{font-size:1.6rem} h2{font-size:1.2rem;margin-bottom:.6rem} h3{font-size:1rem;margin:.9rem 0 .3rem}
 button{font:inherit;cursor:pointer}
-.wrap{max-width:1120px;margin:0 auto;padding:1rem}
-.sitefooter{padding:1.2rem 1rem 2rem}
+.wrap{max-width:1120px;margin:0 auto;padding:1rem;min-width:0;width:100%;box-sizing:border-box}
 
-.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
-.top .in{max-width:1120px;margin:0 auto;padding:.6rem 1rem 0;display:flex;align-items:center;gap:.8rem}
-.brand{font-family:var(--serif);font-size:1.35rem;color:var(--head);display:flex;align-items:center;gap:.5rem;font-weight:700}
+.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line);max-width:100%}
+.top .in{max-width:1120px;margin:0 auto;padding:.6rem 1rem 0;display:flex;flex-wrap:wrap;align-items:center;gap:.45rem .7rem}
+.top-user{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:.4rem .55rem;margin-left:auto;min-width:0}
+.top-forum{flex:none;white-space:normal;text-align:center;text-decoration:none;box-sizing:border-box}
+.brand{font-family:var(--serif);font-size:1.35rem;color:var(--head);display:flex;align-items:center;gap:.5rem;font-weight:700;flex:none}
 .brand-logo{width:1.7rem;height:1.7rem;display:inline-flex;flex:none;color:var(--head)}
 .brand-logo svg{width:100%;height:100%;display:block}
 .grow{flex:1}
-.who{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:.4rem}
+.who{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;min-width:0;max-width:100%}
+.uname{display:inline-block;overflow-wrap:anywhere}
 .avatar{width:1.8rem;height:1.8rem;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex:none;overflow:hidden;line-height:1}
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .avatar.lg{width:4.5rem;height:4.5rem;font-size:2.2rem}
 .avatar-picks{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0}
 .avatar-picks button{width:2.4rem;height:2.4rem;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:1.2rem;display:flex;align-items:center;justify-content:center;padding:0}
 .avatar-picks button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--soft)}
-.savestate{font-size:.78rem;color:var(--muted);min-width:5.5em;text-align:right}
+.savestate{font-size:.78rem;color:var(--muted);min-width:0;text-align:right}
 nav.tabs{max-width:1120px;margin:0 auto;display:flex;gap:.25rem;overflow-x:auto;padding:.3rem .6rem 0;scrollbar-width:none}
 nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:.55rem .8rem;white-space:nowrap;font-weight:500}
 nav.tabs button[aria-current="page"]{color:var(--head);border-bottom-color:var(--accent);font-weight:700}
@@ -91,6 +95,44 @@ nav.tabs button[aria-current="page"]{color:var(--head);border-bottom-color:var(-
 .ico{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:8px;width:2.2rem;height:2.2rem;flex:none}
 .ico:hover{color:var(--danger);border-color:var(--danger)}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+details.brew-extra{margin-top:.85rem;border:1px solid var(--line);border-radius:10px;padding:.55rem .75rem;background:var(--bg);container-type:inline-size;container-name:brew-extra}
+details.brew-extra>summary{cursor:pointer;font-weight:600;color:var(--head);font-family:var(--serif);list-style-position:outside}
+details.brew-extra>summary::-webkit-details-marker{color:var(--accent)}
+details.brew-extra[open]>summary{margin-bottom:.55rem}
+details.brew-extra h3{margin:.75rem 0 .35rem;font-size:.95rem}
+details.brew-extra .fgrid{margin-top:.2rem}
+details.brew-extra .scroll{overflow-x:visible}
+details.brew-extra .scroll .brew-xn-tbl,details.brew-extra .brew-xn-tbl{width:100%;max-width:100%;table-layout:fixed;font-size:.88rem;margin:.25rem 0 .4rem}
+details.brew-extra .brew-xn-tbl th,details.brew-extra .brew-xn-tbl td{vertical-align:middle;overflow-wrap:break-word}
+details.brew-extra .brew-xn-tbl .xn-planned{width:6.5rem;color:var(--muted);white-space:nowrap}
+details.brew-extra .brew-xn-tbl .xn-actual{width:7.5rem}
+details.brew-extra .brew-xn-tbl .xn-actions{width:2.6rem;text-align:center;padding-left:.2rem;padding-right:.2rem}
+details.brew-extra .brew-xn-tbl .xn-actual input,details.brew-extra .brew-xn-tbl td.xn-actual input{width:100%;max-width:none;padding:.35rem .45rem;font-size:.88rem;box-sizing:border-box}
+details.brew-extra .brew-xn-tbl input{padding:.35rem .45rem;font-size:.88rem;max-width:none}
+details.brew-extra .brew-xn-tbl td.xn-planned input[data-xn-ep]{width:3.6rem}
+details.brew-extra .brew-xn-tbl td.xn-planned input[data-xn-eu]{width:2.4rem}
+details.brew-extra .brew-xn-rec{font-size:.72rem;color:var(--muted);font-weight:400;line-height:1.25}
+/* Écran étroit : chaque relevé devient une fiche (nom, puis prévu / réel), au lieu d’un tableau dont la 1re colonne s’écrase lettre par lettre. */
+@container brew-extra (max-width:26rem){
+  details.brew-extra{padding:.5rem .55rem}
+  details.brew-extra .scroll .brew-xn-tbl,details.brew-extra .brew-xn-tbl{display:block;table-layout:auto;font-size:.92rem;margin:.15rem 0 .35rem}
+  details.brew-extra .brew-xn-tbl thead{display:none}
+  details.brew-extra .brew-xn-tbl tbody{display:flex;flex-direction:column;gap:.45rem}
+  details.brew-extra .brew-xn-tbl tr{display:grid;grid-template-columns:minmax(0,1fr);gap:.28rem .4rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:.55rem .6rem}
+  details.brew-extra .brew-xn-tbl tr:has(> .xn-actions button){grid-template-columns:minmax(0,1fr) auto}
+  details.brew-extra .brew-xn-tbl td{display:block;width:auto;max-width:none;min-width:0;padding:0;border:0;white-space:normal;overflow-wrap:break-word}
+  details.brew-extra .brew-xn-tbl td:first-child{grid-column:1;grid-row:1;font-weight:600;color:var(--text)}
+  details.brew-extra .brew-xn-tbl tr:has(> .xn-actions button)>td.xn-actions{grid-column:2;grid-row:1;align-self:center;width:auto}
+  details.brew-extra .brew-xn-tbl td.xn-actions:empty{display:none}
+  details.brew-extra .brew-xn-tbl td.xn-planned,details.brew-extra .brew-xn-tbl td.xn-actual{grid-column:1 / -1;display:flex;align-items:center;flex-wrap:wrap;gap:.35rem .45rem;width:auto;max-width:none;min-width:0;font-weight:500;color:var(--text)}
+  details.brew-extra .brew-xn-tbl td.xn-planned::before,details.brew-extra .brew-xn-tbl td.xn-actual::before{content:attr(data-label);flex:0 0 5.6rem;font-size:.72rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+  details.brew-extra .brew-xn-tbl td.xn-actual input{flex:1 1 6rem;width:auto;min-width:0}
+  details.brew-extra .brew-xn-tbl td.xn-planned input[data-xn-ep]{flex:1 1 4.5rem;width:auto;max-width:8rem;min-width:0}
+  details.brew-extra .brew-xn-tbl td.xn-planned input[data-xn-eu]{flex:0 0 3.2rem;width:3.2rem}
+}
+.brew-extra-chip{font-size:.75rem;color:var(--muted);margin-top:.35rem}
+.brew-extra-hint{font-size:.9rem;color:var(--muted);margin:.5rem 0 .75rem;padding:.55rem .8rem;border:1px dashed var(--line);border-radius:10px;background:var(--surface)}
+.brew-extra-hint button{font:inherit;font-size:inherit;color:var(--head);background:none;border:none;padding:0;text-decoration:underline;cursor:pointer}
 
 input,select,textarea{width:100%;padding:.55rem .65rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);font:inherit;min-width:0}
 textarea{min-height:5rem;resize:vertical}
@@ -98,11 +140,11 @@ textarea{min-height:5rem;resize:vertical}
 .fld>span{font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
 output{padding:.55rem 0;font-weight:600;color:var(--head)}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem}
-.fld.span2{grid-column:span 2}
-.bar{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:1rem}
-.search{max-width:260px}
+.fld.span2{grid-column:1 / -1}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:1rem;min-width:0}
+.search{max-width:min(260px,100%)}
 
-.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1rem;margin-bottom:1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1rem;margin-bottom:1rem;min-width:0;max-width:100%;overflow-x:hidden}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1rem}
 .rcard{cursor:pointer;display:flex;flex-direction:column;gap:.5rem;text-align:left;width:100%;color:inherit;margin:0}
 .rcard:hover{border-color:var(--accent)}
@@ -110,18 +152,31 @@ output{padding:.55rem 0;font-weight:600;color:var(--head)}
 .chip{display:inline-block;background:var(--okbg);color:var(--head);border-radius:99px;padding:.1rem .6rem;font-size:.8rem;font-weight:600}
 .chip.bad{background:var(--dangerbg);color:var(--danger)}
 .sub{color:var(--muted);font-size:.9rem}
+.foot-usage{text-align:center;color:var(--muted);font-size:.75rem;margin:1.6rem 0 0;opacity:.72}
 .empty{text-align:center;color:var(--muted);padding:2.5rem 1rem;border:2px dashed var(--line);border-radius:14px}
 .sw{width:22px;height:22px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);display:inline-block;vertical-align:middle}
 
-.editor{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:1rem;align-items:start}
-.stats{position:sticky;top:112px}
-@media (max-width:860px){.editor{grid-template-columns:1fr}.stats{position:static;order:-1}}
+.editor{display:grid;grid-template-columns:minmax(0,1fr) 320px;grid-template-areas:"identity stats" "rest stats";gap:1rem;align-items:start}
+.recipe-identity{grid-area:identity;margin-bottom:0;min-width:0}
+.editor-rest{grid-area:rest;min-width:0}
+.stats{grid-area:stats;position:sticky;top:112px;min-width:0}
+.style-line{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.style-line select{flex:1 1 12rem;min-width:0;width:auto}
+.sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:.6rem;min-width:0}
+.sheet-head > div{min-width:0}
+.account-id{display:flex;gap:.8rem;align-items:center;min-width:0}
+.account-id > div{min-width:0}
+@media (max-width:860px){
+  .editor{grid-template-columns:minmax(0,1fr);grid-template-areas:"identity" "stats" "rest"}
+  .stats{position:static}
+}
 .namefield{font-family:var(--serif);font-size:1.4rem;font-weight:600}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:.6rem;align-items:end;padding:.7rem 0;border-top:1px solid var(--line)}
-.row .rowhead{grid-column:1/-1;display:flex;gap:.5rem}
+.row .rowhead{grid-column:1/-1;display:flex;gap:.5rem;min-width:0}
+.row .rowhead select,.row .rowhead input{flex:1;min-width:0;width:auto}
 .row .hint{grid-column:1/-1;min-height:0}
 .row .hint:empty{display:none}
-.secthead{display:flex;align-items:center;gap:.6rem;margin-bottom:.2rem}
+.secthead{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:.2rem;min-width:0}
 .beer{display:flex;gap:1rem;align-items:center;margin-bottom:.6rem}
 .glass{width:54px;height:76px;border:2px solid var(--head);border-radius:6px 6px 14px 14px;overflow:hidden;position:relative;background:var(--surface);flex:none}
 .glass .foam{height:14px;background:#fffdf5;border-bottom:1px solid var(--line)}
@@ -139,17 +194,26 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-weight:600;text-align:right}
 .tbl th{text-align:left;font-size:.75rem;text-transform:uppercase;color:var(--muted);letter-spacing:.04em;padding:.4rem .5rem;border-bottom:2px solid var(--line)}
 .tbl td{padding:.5rem;border-bottom:1px solid var(--line);vertical-align:middle}
 .tbl input{padding:.35rem .5rem;max-width:110px}
-.scroll{overflow-x:auto}
+.scroll{display:block;width:100%;max-width:100%;min-width:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll .tbl{width:max-content;max-width:none}
 .seg{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
 .seg button{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:99px;padding:.35rem .9rem}
 .seg button[aria-pressed="true"]{background:var(--btn);color:var(--btnfg);border-color:var(--btn)}
 
+.sheet{min-width:0;max-width:100%}
 .sheet h1{font-size:1.9rem}
 .sheet ol{padding-left:1.3rem} .sheet li{margin:.4rem 0}
+.editor,.editor-rest,.stats,.recipe-identity{min-width:0;max-width:100%}
+.bar > .btn,.bar > .seg{max-width:100%}
 
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);padding:1.2rem;width:min(560px,94vw);max-height:90vh;overflow:auto}
 dialog::backdrop{background:rgba(20,30,20,.5)}
-.dlg-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem}
+.dlg-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.6rem;margin-top:1rem}
+.br-style-row{display:flex;align-items:flex-start;gap:.55rem;width:100%;margin:0;border:1px solid var(--line);border-radius:6px;padding:.45rem .6rem;background:var(--surface);color:var(--text);font:inherit;cursor:pointer;box-sizing:border-box}
+.br-style-row:hover{border-color:var(--accent);background:var(--bg)}
+.br-style-row:has(input:checked){border-color:var(--accent);box-shadow:0 0 0 2px var(--soft)}
+.br-style-row input{width:auto;margin:.15rem 0 0;flex:none;accent-color:var(--accent)}
+.br-style-row span{min-width:0;flex:1;text-align:left}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:1.2rem;background:var(--head);color:var(--bg);padding:.6rem 1rem;border-radius:10px;z-index:99;display:none;max-width:90vw;font-size:.92rem}
 .authscreen{position:relative;min-height:100vh;overflow:hidden}
 .auth-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--soft);opacity:.22;pointer-events:none;z-index:0}
@@ -195,6 +259,7 @@ dialog::backdrop{background:rgba(20,30,20,.5)}
 :root[data-density="compact"] h2{font-size:1.05rem;margin-bottom:.4rem}
 :root[data-density="compact"] h3{font-size:.92rem;margin:.6rem 0 .25rem}
 :root[data-density="compact"] .card{padding:.65rem;margin-bottom:.6rem;border-radius:10px}
+:root[data-density="compact"] .recipe-identity{margin-bottom:0}
 :root[data-density="compact"] .bar{gap:.4rem;margin-bottom:.6rem}
 :root[data-density="compact"] .fgrid{gap:.5rem}
 :root[data-density="compact"] .btn{padding:.4rem .75rem}
@@ -212,6 +277,28 @@ dialog::backdrop{background:rgba(20,30,20,.5)}
 :root[data-density="compact"] dialog{padding:.8rem}
 :root[data-density="compact"] .seg{gap:.3rem;margin-bottom:.6rem}
 :root[data-density="compact"] .sub{font-size:.85rem}
+
+@media (max-width:720px){
+  .wrap{padding:.75rem}
+  .top .in{
+    padding:.5rem .7rem 0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"brand user" "forum forum";
+    align-items:center;
+    gap:.45rem .6rem;
+  }
+  .brand{grid-area:brand;min-width:0}
+  .top-user{grid-area:user;margin-left:0;justify-self:end}
+  .top-forum{grid-area:forum;width:100%}
+  .search{max-width:none;flex:1 1 12rem}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cards{grid-template-columns:minmax(0,1fr)}
+  .seg{max-width:100%}
+  .seg button{white-space:normal;text-align:center}
+  nav.tabs{flex-wrap:wrap;overflow-x:visible;padding:.3rem .4rem 0}
+  nav.tabs button{padding:.4rem .55rem;font-size:.92rem}
+}
 </style>
 </head>
 <body>
@@ -311,26 +398,42 @@ function ebcColor(ebc) {
 /* ---------- 2. API & SESSION ---------- */
 async function api(action, payload = {}) {
   let res, j;
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 60000);
   try {
-    res = await fetch('api.php', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action, ...payload})});
-  } catch { throw new Error('Serveur injoignable — vérifiez votre connexion.'); }
-  try { j = await res.json(); } catch { throw new Error('Réponse invalide du serveur.'); }
+    res = await fetch('api.php', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({action, ...payload}), signal: ctrl.signal});
+  } catch (e) {
+    throw new Error(e.name === 'AbortError' ? 'Délai dépassé — le serveur ne répond pas (session forum bloquée ?). Actualisez la page.' : 'Serveur injoignable — vérifiez votre connexion.');
+  } finally { clearTimeout(t); }
+  try { j = await res.json(); } catch {
+    throw new Error('Réponse invalide du serveur (HTTP ' + res.status + '). Vérifiez les logs PHP / phpBB.');
+  }
   if (!j.ok) throw new Error(j.error || 'Erreur inconnue.');
   return j;
 }
 let USER = null, D = null;                    // utilisateur courant et ses données
+const AUTH = {mode: 'standalone', features: {register: true, local_login: true, delete_account: true}, login_url: '', logout_url: '', brewrecipes_share_url: '', brewrecipes_style_guides_url: '', brewrecipes_styles_url: '', avatar_url: '', mysql_ready: true, blocked: '', brewer_count: null, visitor_count: null};
 const ui = {view: 'recipes', rid: null, q: '', tab: 'ferm', auth: 'login', showArchivedIng: false, sheetSteps: true, sheetCost: true, ingSort: {key: 'name', dir: 'asc'}};
 const R = () => D && D.recipes.find(r => r.id === ui.rid);
 
 let saveT, saveBusy = false, saveQueued = false;
 function setSaveState(s) { const el = $('#savestate'); if (el) el.textContent = s; }
 async function saveNow() {
-  if (!USER) return;
-  if (saveBusy) { saveQueued = true; return; }
+  if (!USER) return false;
+  if (saveBusy) { saveQueued = true; return false; }
   saveBusy = true; setSaveState('Enregistrement…');
-  try { await api('save', {data: D}); setSaveState('Enregistré'); }
-  catch (e) { setSaveState('Non enregistré'); toast('Échec de l’enregistrement : ' + e.message); }
-  finally { saveBusy = false; if (saveQueued) { saveQueued = false; saveNow(); } }
+  try {
+    await api('save', {data: D});
+    setSaveState('Enregistré');
+    return true;
+  } catch (e) {
+    setSaveState('Non enregistré');
+    toast('Échec de l’enregistrement : ' + e.message);
+    return false;
+  } finally {
+    saveBusy = false;
+    if (saveQueued) { saveQueued = false; saveNow(); }
+  }
 }
 const persist = () => { setSaveState('Modifié…'); clearTimeout(saveT); saveT = setTimeout(saveNow, 800); };
 
@@ -374,6 +477,8 @@ function normalizeData(d) {
   if (d.prefs.avatarType !== 'image') d.prefs.avatarType = 'emoji';
   if (!d.prefs.avatarEmoji) d.prefs.avatarEmoji = '🍺';
   if (typeof d.prefs.avatarImage !== 'string') d.prefs.avatarImage = '';
+  if (d.prefs.brewExtraNotes !== true) d.prefs.brewExtraNotes = false;
+  d.brews.forEach(normalizeBrewExtraNotes);
   return d;
 }
 // Recadre l'image importée en carré (centre), la réduit à 160×160 et la compresse en JPEG — garde la
@@ -396,10 +501,15 @@ function resizeAvatarImage(file) {
 }
 const AVATAR_PICKS = ['🍺', '🍻', '🌾', '🍯', '🔥', '🧉', '🍋', '🫐'];
 function avatarHTML(cls) {
-  const p = D.prefs;
-  return p.avatarType === 'image' && p.avatarImage
-    ? `<span class="avatar ${cls || ''}"><img src="${p.avatarImage}" alt=""></span>`
-    : `<span class="avatar ${cls || ''}">${esc(p.avatarEmoji || '🍺')}</span>`;
+  const p = D?.prefs || {};
+  // Mode forum : avatar phpBB par défaut ; photo HopHop locale si l’utilisateur en a importé une.
+  if (p.avatarType === 'image' && p.avatarImage) {
+    return `<span class="avatar ${cls || ''}"><img src="${p.avatarImage}" alt=""></span>`;
+  }
+  if (AUTH.mode === 'phpbb' && AUTH.avatar_url) {
+    return `<span class="avatar ${cls || ''}"><img src="${esc(AUTH.avatar_url)}" alt=""></span>`;
+  }
+  return `<span class="avatar ${cls || ''}">${esc(p.avatarEmoji || '🍺')}</span>`;
 }
 const THEMES = [['vert', 'Vert nature'], ['ambre', 'Ambre'], ['ble', 'Blé doré'], ['myrtille', 'Myrtille'], ['sombre', 'Sombre']];
 function applyPrefs() {
@@ -408,22 +518,70 @@ function applyPrefs() {
   html.setAttribute('data-density', D?.prefs?.density || 'classic');
 }
 async function enterApp(name) {
-  USER = name;
   const r = await api('load');
+  USER = name;
   D = normalizeData(r.data);
   applyPrefs();
-  ui.view = 'recipes'; render();
+  ui.view = 'recipes';
+  render();
+  await maybeConsumeBrewRecipesImport();
+}
+/** BeerXML en attente après POST import_preview.php (BrewRecipes → HopHop). */
+async function maybeConsumeBrewRecipesImport() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('brewrecipes_import') !== '1') return;
+  try {
+    const pending = await api('consume_brewrecipes_import');
+    const added = importBeerXML(pending.beerxml);
+    if (added.length === 1) {
+      if (pending.brewrecipes_id) added[0].brewrecipesId = pending.brewrecipes_id;
+      ui.rid = added[0].id;
+      ui.view = 'editor';
+      renderMain();
+      window.scrollTo(0, 0);
+    } else {
+      renderMain(true);
+    }
+    const saved = await saveNow();
+    toast(saved
+      ? (added.length > 1 ? `${added.length} recettes importées depuis BrewRecipes` : 'Recette ouverte depuis BrewRecipes')
+      : 'Recette à l’écran mais non enregistrée sur le serveur.');
+  } catch (e) {
+    toast(e.message || 'Import BrewRecipes impossible.');
+  }
+  params.delete('brewrecipes_import');
+  params.delete('brewrecipes_id');
+  const qs = params.toString();
+  history.replaceState(null, '', qs ? (location.pathname + '?' + qs) : location.pathname);
 }
 async function logout() {
+  if (AUTH.mode === 'phpbb' && AUTH.logout_url) { window.location.href = AUTH.logout_url; return; }
   try { await api('logout'); } catch {}
   USER = D = null; ui.auth = 'login';
   document.documentElement.removeAttribute('data-theme'); document.documentElement.removeAttribute('data-density');
   render();
 }
+function applySessionMeta(s) {
+  AUTH.mode = s.auth_mode || 'standalone';
+  AUTH.features = s.features || AUTH.features;
+  AUTH.login_url = s.login_url || '';
+  AUTH.logout_url = s.logout_url || '';
+  AUTH.brewrecipes_share_url = s.brewrecipes_share_url || '';
+  AUTH.brewrecipes_style_guides_url = s.brewrecipes_style_guides_url || '';
+  AUTH.brewrecipes_styles_url = s.brewrecipes_styles_url || '';
+  AUTH.avatar_url = s.avatar_url || '';
+  AUTH.mysql_ready = s.mysql_ready !== false;
+  AUTH.blocked = s.blocked || '';
+  const usageOk = AUTH.mode === 'phpbb';
+  AUTH.brewer_count = (usageOk && typeof s.brewer_count === 'number' && s.brewer_count >= 0) ? s.brewer_count : null;
+  AUTH.visitor_count = (usageOk && typeof s.visitor_count === 'number' && s.visitor_count >= 0) ? s.visitor_count : null;
+}
+/** URLs BrewRecipes fournies par la session (vides hors intégration phpBB). */
+function brewrecipesShareUrl() { return AUTH.brewrecipes_share_url || ''; }
+function brewrecipesStyleGuidesUrl() { return AUTH.brewrecipes_style_guides_url || ''; }
+function brewrecipesStylesUrl() { return AUTH.brewrecipes_styles_url || ''; }
 
 /* ---------- 3. LIBELLÉS & GABARITS ---------- */
-// Mention de licence : affichée sur l'écran de connexion et en pied de page sur toutes les vues de l'application.
-const LICENSE_HTML = `HopHop © claude.ai & Penn-Maen — <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener" style="color:inherit">CC BY-NC-SA 4.0</a>`;
 const FTYPE = {grain: 'Grain (empâté)', sugar: 'Sucre', extract: 'Extrait'};
 const USE_H = {boil: 'Ébullition', fwh: 'Premier moût', whirl: 'Whirlpool', hopstand: 'Hop stand', dry: 'Dry hop'};
 const USE_M = {mash: 'Empâtage', boil: 'Ébullition', ferm: 'Fermentation', bottle: 'Embouteillage'};
@@ -434,8 +592,7 @@ const RLIB = {ferm: 'ferm', hops: 'hop', yeast: 'yeast', misc: 'misc'};   // sec
 const lib = (t, id) => D.ing[t].find(x => x.id === id);
 const unitOf = (t, x) => t === 'ferm' ? 'kg' : t === 'hop' ? 'g' : t === 'yeast' ? 'sachet(s)' : (x.unit || 'g');
 const DEFAULT_P = {name: 'Défaut', batch: 20, boil: 60, evap: 3, trub: 1.5, mashLoss: 1, absorb: 1, shrink: 4, eff: 72, ratio: 3, infusionTemp: 96, mashMethod: 'classic', biabSqueeze: false};
-// Méthode de brassage : classique (empâtage dans une cuve dédiée + rinçage des drêches) ou BIAB (Brew in a Bag :
-// tout le volume d'eau est présent dès l'empâtage, grains dans un sac filtrant, pas de rinçage séparé).
+// Méthode de brassage : classique (empâtage + rinçage) ou BIAB (volume unique dans la cuve d’ébullition, sans rinçage).
 const BREW_METHOD = [['classic', 'Classique (empâtage + rinçage)'], ['biab', 'Brew in a Bag — BIAB (volume unique, sans rinçage)']];
 
 function newRecipe() {
@@ -443,7 +600,7 @@ function newRecipe() {
   return {id: uid(), name: 'Nouvelle recette', style: '', styleId: '', profileId: D.profiles[0]?.id || '', batch: p.batch, ratio: p.ratio, eff: p.eff, infusionTemp: p.infusionTemp, mashMethod: p.mashMethod, biabSqueeze: p.biabSqueeze, grainTemp: 20, co2: 2.4,
     ferm: [], hops: [], yeast: [], misc: [],
     mash: [{name: 'Saccharification', temp: 67, time: 60}, {name: 'Mash out', temp: 78, time: 10}],
-    ferment: [{name: 'Fermentation primaire', temp: 19, days: 14}, {name: 'Garde à froid', temp: 4, days: 14}],
+    ferment: [{name: 'Fermentation tumultueuse', temp: 19, days: 14}, {name: 'Cold crash', temp: 4, days: 7}],
     notes: '', created: Date.now(), updated: Date.now()};
 }
 
@@ -480,8 +637,7 @@ function calc(r) {
   const pbSG = 1 + potEff / preboil / 1000;
   const totalWater = preboil + effAbsorb * kgMash + P.mashLoss;
   const ratio = Math.max(N(r.ratio != null ? r.ratio : P.ratio), 0.5);
-  // Classique : eau d'empâtage plafonnée au rapport eau/grain, le reste en rinçage. BIAB : volume unique dès
-  // l'empâtage (sac filtrant dans la cuve d'ébullition), aucun rinçage séparé.
+  // Classique : eau d'empâtage plafonnée au rapport eau/grain, le reste en rinçage. BIAB : volume unique dès l'empâtage.
   const mashWater = mashMethod === 'biab' ? totalWater : Math.min(totalWater, ratio * kgMash);
   const sparge = mashMethod === 'biab' ? 0 : Math.max(0, totalWater - mashWater);
   const mashTemp = r.mash[0] ? N(r.mash[0].temp) : 67;
@@ -552,6 +708,16 @@ function calc(r) {
 }
 
 /* ---------- 5. VUES ---------- */
+const countLabel = (n, one, many) => (n === 1 ? '1 ' + one : f(n, 0) + ' ' + many);
+const pageFoot = () => {
+  const brewers = AUTH.mode === 'phpbb' ? AUTH.brewer_count : null;
+  const visitors = AUTH.mode === 'phpbb' ? AUTH.visitor_count : null;
+  const usage = (typeof brewers === 'number' && typeof visitors === 'number')
+    ? `<p class="foot-usage noprint">${countLabel(brewers, 'brasseur', 'brasseurs')} sur HopHop avec au moins une recette, et ${countLabel(visitors, 'visiteur', 'visiteurs')}</p>`
+    : '';
+  const copyStyle = usage ? 'text-align:center;margin-top:.2rem' : 'text-align:center';
+  return `${usage}<p class="sub noprint" style="${copyStyle}"><a href="help.html" style="color:inherit">Aide</a> — HopHop © claude.ai &amp; Penn-Maen + Jean-Luc (intégration phpBB+BrewRecipes) — <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener" style="color:inherit">CC BY-NC-SA 4.0</a></p>`;
+};
 const fld = (label, html, cls = '') => `<label class="fld ${cls}"><span>${label}</span>${html}</label>`;
 const bi = (path, val, n) => `<input data-b="${path}" ${n ? 'data-n inputmode="decimal"' : ''} value="${esc(val)}">`;
 const bs = (path, list, val) => `<select data-b="${path}">${opts(list, val)}</select>`;
@@ -569,11 +735,30 @@ const libOpts = (t, sel) => {
 };
 
 function authHTML() {
-  const reg = ui.auth === 'register';
+  if (AUTH.mode === 'phpbb' && AUTH.blocked === 'robot') {
+    return `<div class="authscreen"><div class="auth-bg" aria-hidden="true">${LOGO_SVG}</div><div class="wrap"><div class="auth card">
+    <h1 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:.5rem"><span class="brand-logo" style="width:2.2rem;height:2.2rem">${LOGO_SVG}</span>HopHop</h1>
+    <p class="err" role="alert">Les robots du forum ne peuvent pas utiliser HopHop.</p>
+  </div></div></div>`;
+  }
+  if (AUTH.mode === 'phpbb') {
+    const loginBtn = AUTH.login_url
+      ? `<a class="btn" href="${esc(AUTH.login_url)}" style="width:100%;text-align:center;text-decoration:none;display:inline-block;box-sizing:border-box">Se connecter au forum</a>`
+      : '<p class="err">Connexion forum indisponible.</p>';
+    const dbWarn = AUTH.mysql_ready === false
+      ? '<p class="err" role="alert">Stockage MySQL : créez la table <code>hophop_store</code> (voir docs/sql/hophop_store.sql).</p>' : '';
+    return `<div class="authscreen"><div class="auth-bg" aria-hidden="true">${LOGO_SVG}</div><div class="wrap"><div class="auth card">
+    <h1 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:.5rem"><span class="brand-logo" style="width:2.2rem;height:2.2rem">${LOGO_SVG}</span>HopHop</h1>
+    <p class="sub" style="text-align:center">Atelier recettes BrassageAmateur — utilisez votre compte forum.</p>
+    ${dbWarn}${loginBtn}
+    <p class="sub" style="margin-bottom:0">Une fois connecté au forum, rouvrez cette page ou actualisez.</p>
+  </div></div></div>`;
+  }
+  const reg = ui.auth === 'register' && AUTH.features.register;
   return `<div class="authscreen"><div class="auth-bg" aria-hidden="true">${LOGO_SVG}</div><div class="wrap"><div class="auth card">
     <h1 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:.5rem"><span class="brand-logo" style="width:2.2rem;height:2.2rem">${LOGO_SVG}</span>HopHop</h1>
     <p class="sub" style="text-align:center">Créez et calculez vos recettes de bière.</p>
-    <div class="seg"><button data-act="authMode" data-m="login" aria-pressed="${!reg}">Connexion</button><button data-act="authMode" data-m="register" aria-pressed="${reg}">Créer un compte</button></div>
+    ${AUTH.features.register ? `<div class="seg"><button data-act="authMode" data-m="login" aria-pressed="${!reg}">Connexion</button><button data-act="authMode" data-m="register" aria-pressed="${reg}">Créer un compte</button></div>` : ''}
     <div class="fgrid" style="grid-template-columns:1fr">
       ${fld('Identifiant', '<input id="a-user" autocomplete="username" autocapitalize="off">')}
       ${fld('Mot de passe', '<input id="a-pw" type="password" autocomplete="' + (reg ? 'new-password' : 'current-password') + '">')}
@@ -582,17 +767,19 @@ function authHTML() {
     <div class="err" id="a-err" role="alert"></div>
     <button class="btn" id="a-go" style="width:100%" data-act="authGo">${reg ? 'Créer mon compte' : 'Se connecter'}</button>
     <p class="sub" style="margin-bottom:0">Compte et recettes enregistrés sur ce serveur.</p>
-  </div><p class="sub" style="text-align:center;margin-top:1rem">${LICENSE_HTML}</p></div></div>`;
+  </div></div></div>`;
 }
 
 function shellHTML() {
   const cur = ['editor', 'sheet'].includes(ui.view) ? 'recipes' : ui.view;
   const T = [['recipes', 'Recettes'], ['brews', 'Brassins'], ['ings', 'Ingrédients'], ['profiles', 'Matériel'], ['account', 'Compte']];
-  return `<header class="top"><div class="in"><div class="brand"><span class="brand-logo">${LOGO_SVG}</span>HopHop</div><div class="grow"></div>
-    <span class="savestate" id="savestate"></span><span class="who">${avatarHTML()}${esc(USER)}</span><button class="btn ghost sm" data-act="logout">Déconnexion</button></div>
+  const forumBack = AUTH.mode === 'phpbb'
+    ? '<a class="btn ghost sm top-forum" href="/forum/">Retour sur le forum</a>'
+    : '<button class="btn ghost sm top-forum" data-act="logout">Déconnexion</button>';
+  return `<header class="top"><div class="in"><div class="brand"><span class="brand-logo">${LOGO_SVG}</span>HopHop</div>
+    <div class="top-user"><span class="savestate" id="savestate"></span><span class="who">${avatarHTML()}<span class="uname">${esc(USER)}</span></span></div>${forumBack}</div>
     <nav class="tabs" aria-label="Navigation principale">${T.map(([v, l]) => `<button data-act="go" data-v="${v}" ${cur === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></header>
-    <main class="wrap" id="main"></main>
-    <footer class="sitefooter noprint"><p class="sub" style="text-align:center;margin:0">${LICENSE_HTML}</p></footer>`;
+    <main class="wrap" id="main"></main>`;
 }
 
 function recipeCard(r) {
@@ -616,7 +803,7 @@ function viewRecipes() {
     <input type="file" id="importBeerXMLFile" accept=".xml,text/xml,application/xml" style="display:none">
     <button class="btn ghost" data-act="importRecipeJSON">Importer BeerJSON</button>
     <input type="file" id="importBeerJSONFile" accept=".json,application/json" style="display:none">
-    <button class="btn" data-act="newRecipe">+ Nouvelle recette</button></div><div id="rlist">${recipeListHTML()}</div>`;
+    <button class="btn" data-act="newRecipe">+ Nouvelle recette</button></div><div id="rlist">${recipeListHTML()}</div>${pageFoot()}`;
 }
 
 /* --- Éditeur de recette --- */
@@ -633,7 +820,7 @@ function rowHop(x, i) {
     ${x.use === 'fwh' ? '' : fld(timeLabel, bi(`hops.${i}.time`, x.time, 1))}
     ${hopstand ? fld('Température (°C)', bi(`hops.${i}.temp`, x.temp != null ? x.temp : 80, 1)) : ''}
     ${dry ? fld('Température (°C) — optionnel', bi(`hops.${i}.temp`, x.temp != null ? x.temp : '', 1)) : ''}
-    <div class="fld"><span>α / Forme</span><output data-cell="hform:${i}">${esc(hformTxt)}</output></div>
+    <div class="fld"><span>αA / Forme</span><output data-cell="hform:${i}">${esc(hformTxt)}</output></div>
     <div class="fld"><span>Amertume</span><output data-cell="hi:${i}">–</output></div><div class="hint" data-stk="hops:${i}"></div></div>`;
 }
 function rowYeast(x, i) {
@@ -664,10 +851,10 @@ function viewEditor() {
   const r = R(); if (!r) { ui.view = 'recipes'; return viewRecipes(); }
   return `<div class="bar"><button class="btn ghost sm" data-act="go" data-v="recipes">← Recettes</button><div class="grow"></div>
     <button class="btn ghost sm" data-act="sheet">Fiche recette</button><button class="btn sm" data-act="brewFrom">Enregistrer un brassage</button></div>
-  <div class="editor"><div>
-    <section class="card"><input class="namefield" data-b="name" value="${esc(r.name)}" aria-label="Nom de la recette" style="margin-bottom:.8rem">
+  <div class="editor">
+    <section class="card recipe-identity"><input class="namefield" data-b="name" value="${esc(r.name)}" aria-label="Nom de la recette" style="margin-bottom:.8rem">
       <div class="fgrid">
-        ${fld('Style', `<select data-b="styleId">${styleSelectOpts(r.styleId)}</select>`, 'span2')}
+        ${fld('Style', `<div class="style-line"><select data-b="styleId">${styleSelectOpts(r.styleId)}</select>${brewrecipesStyleGuidesUrl() ? '<button type="button" class="btn ghost sm" data-act="pickBrewRecipesStyle">Depuis BrewRecipes…</button>' : ''}</div>`, 'span2')}
         ${fld('Profil matériel', `<select data-b="profileId">${libProfiles(r.profileId)}</select>`)}
         ${fld('Volume final (L)', bi('batch', r.batch, 1))}
         ${fld('Rapport eau/grain (L/kg)', bi('ratio', r.ratio, 1))}
@@ -680,6 +867,7 @@ function viewEditor() {
           <input type="checkbox" data-b="biabSqueeze" style="width:auto" ${r.biabSqueeze ? 'checked' : ''}>
           <span style="text-transform:none;font-size:.95rem;color:var(--text)">Pressurage du sac (pertes réduites)</span></label>` : ''}
       </div></section>
+    <div class="editor-rest">
     ${sectionHTML('Fermentescibles', 'ferm', r.ferm.map(rowFerm), 'Ajouter')}
     ${sectionHTML('Houblons', 'hops', r.hops.map(rowHop), 'Ajouter')}
     ${sectionHTML('Levure', 'yeast', r.yeast.map(rowYeast), 'Ajouter')}
@@ -692,9 +880,12 @@ function viewEditor() {
       <div class="fgrid" style="align-items:end">${fld('Nouveau volume final (L)', `<input id="newvol" inputmode="decimal" value="${esc(r.batch)}">`)}<div class="sub" id="kfac"></div></div>
       <div class="dlg-actions" style="justify-content:flex-start"><button class="btn ghost sm" data-act="resizeApply">Appliquer à cette recette</button><button class="btn ghost sm" data-act="resizeCopy">Créer une copie à ce volume</button></div></section>
     <section class="card"><h2>Exporter et gérer</h2><div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0">
+      ${brewrecipesShareUrl() ? '<button class="btn sm" data-act="shareBrewRecipes">Partager sur BrewRecipes</button>' : ''}
       <button class="btn ghost sm" data-act="exp" data-k="xml">Exporter BeerXML</button><button class="btn ghost sm" data-act="exp" data-k="json">Exporter BeerJSON</button>
       <button class="btn ghost sm" data-act="dupRecipe">Dupliquer</button><button class="btn danger sm" data-act="delRecipe">Supprimer</button></div></section>
-  </div><aside class="stats" id="stats"></aside></div>`;
+    </div>
+  <aside class="stats" id="stats"></aside></div>
+  ${pageFoot()}`;
 }
 const libProfiles = sel => D.profiles.length ? opts([...D.profiles].sort((a, b) => a.name.localeCompare(b.name, 'fr')).map(p => [p.id, p.name]), sel) : '<option value="">(aucun profil — valeurs par défaut)</option>';
 
@@ -802,14 +993,14 @@ function viewSheet() {
     <div class="seg noprint" style="margin:0"><button data-act="sheetMode" data-v="1" aria-pressed="${ui.sheetSteps}">Avec étapes</button><button data-act="sheetMode" data-v="0" aria-pressed="${!ui.sheetSteps}">Sans étapes</button></div>
     <label class="sub noprint" style="display:flex;align-items:center;gap:.35rem;margin:0 .2rem"><input type="checkbox" data-act="toggleSheetCost" style="width:auto" ${ui.sheetCost ? 'checked' : ''}> Coût estimé</label>
     <button class="btn sm" data-act="print">Imprimer</button></div>
-  <div class="sheet"><div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:1rem"><div><h1>${esc(r.name)}</h1><div class="sub">${esc(recipeStyleName(r)) || 'Style non précisé'} · ${f(c.V, 1)} L · matériel : ${esc(P.name)}</div></div><span class="sw" style="width:44px;height:44px;background:${ebcColor(c.ebc)}"></span></div>
+  <div class="sheet"><div class="card"><div class="sheet-head"><div><h1>${esc(r.name)}</h1><div class="sub">${esc(recipeStyleName(r)) || 'Style non précisé'} · ${f(c.V, 1)} L · matériel : ${esc(P.name)}</div></div><span class="sw" style="width:44px;height:44px;flex:none;background:${ebcColor(c.ebc)}"></span></div>
     <div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr));margin-top:1rem">
       <div class="kpi"><b>${gKpi(c.og).primary}</b><span>Densité init.</span><div class="kpi-sub">${gKpi(c.og).secondary}</div></div><div class="kpi"><b>${gKpi(c.fg).primary}</b><span>Densité fin.</span><div class="kpi-sub">${gKpi(c.fg).secondary}</div></div><div class="kpi"><b>${f(c.abv, 1)} %</b><span>Alcool</span></div>
       <div class="kpi"><b>${f(c.ibu, 0)}</b><span>IBU</span></div><div class="kpi"><b>${f(c.ebc, 0)}</b><span>EBC</span></div><div class="kpi"><b>${f(c.bugu, 2)}</b><span>IBU/DI</span></div></div>
     <div class="sub" style="margin-top:.4rem">Au réfractomètre non corrigé, en fin de fermentation : ≈ ${f(rawBrixAtFG(c.og, c.fg), 1)} °Bx.</div></div>
   <div class="card"><h2>Ingrédients</h2>
     ${r.ferm.length ? `<h3>Fermentescibles</h3><div class="scroll"><table class="tbl">${th(['Ingrédient', 'Quantité', 'Part', 'EBC'])}${r.ferm.map((x, i) => { const g = lib('ferm', x.ref); return tr([esc(g?.name || '?'), f(N(x.kg), 3) + ' kg', f(c.fp[i], 1) + ' %', g ? f(g.ebc, 0) : '–']); }).join('')}</table></div>` : ''}
-    ${r.hops.length ? `<h3>Houblons</h3><div class="scroll"><table class="tbl">${th(['Houblon', 'Quantité', 'Forme', 'Usage', 'Temps', 'α %', 'IBU'])}${hopSheetOrder(r.hops).map(i => { const x = r.hops[i], h = lib('hop', x.ref); return tr([esc(h?.name || '?'), f(N(x.g), 0) + ' g', h ? esc(h.form) : '–', USE_H[x.use], x.use === 'fwh' ? '–' : f(N(x.time), 0) + (x.use === 'dry' ? ' j' : ' min'), h ? f(h.alpha, 1) : '–', f(c.hi[i], 1)]); }).join('')}</table></div>` : ''}
+    ${r.hops.length ? `<h3>Houblons</h3><div class="scroll"><table class="tbl">${th(['Houblon', 'Quantité', 'Forme', 'Usage', 'Temps', 'αA %', 'IBU'])}${hopSheetOrder(r.hops).map(i => { const x = r.hops[i], h = lib('hop', x.ref); return tr([esc(h?.name || '?'), f(N(x.g), 0) + ' g', h ? esc(h.form) : '–', USE_H[x.use], x.use === 'fwh' ? '–' : f(N(x.time), 0) + (x.use === 'dry' ? ' j' : ' min'), h ? f(h.alpha, 1) : '–', f(c.hi[i], 1)]); }).join('')}</table></div>` : ''}
     ${r.yeast.length ? `<h3>Levure</h3><ul>${r.yeast.map(y => `<li>${f(N(y.qty), 1)} × ${esc(lib('yeast', y.ref)?.name || '?')}</li>`).join('')}</ul>` : ''}
     ${r.misc.length ? `<h3>Divers</h3><ul>${r.misc.map(m => `<li>${f(N(m.qty), 1)} ${esc(lib('misc', m.ref)?.unit || '')} ${esc(lib('misc', m.ref)?.name || '?')} — ${USE_M[m.use]}${m.use === 'boil' || m.use === 'mash' ? ' (' + f(N(m.time), 0) + ' min)' : ''}</li>`).join('')}</ul>` : ''}
     ${!r.ferm.length && !r.hops.length ? '<div class="sub">Aucun ingrédient.</div>' : ''}</div>
@@ -820,10 +1011,241 @@ function viewSheet() {
   ${ui.sheetCost && c.costTotal > 0 ? `<div class="card"><h2>Coût estimé</h2><dl class="kv"><dt>Fermentescibles</dt><dd>${f(c.costFerm, 2)} €</dd><dt>Houblons</dt><dd>${f(c.costHop, 2)} €</dd><dt>Levure</dt><dd>${f(c.costYeast, 2)} €</dd><dt>Divers</dt><dd>${f(c.costMisc, 2)} €</dd>
     <dt>Total</dt><dd>${f(c.costTotal, 2)} €</dd><dt>Par litre</dt><dd>${f(c.costPerL, 2)} €/L</dd></dl></div>` : ''}
   ${ui.sheetSteps ? `<div class="card"><h2>Étapes de brassage</h2><ol>${brewSteps(r, c).map(s => `<li>${s}</li>`).join('')}</ol></div>` : ''}
-  ${r.notes ? `<div class="card"><h2>Notes</h2><div style="white-space:pre-wrap">${esc(r.notes)}</div></div>` : ''}</div>`;
+  ${r.notes ? `<div class="card"><h2>Notes</h2><div style="white-space:pre-wrap">${esc(r.notes)}</div></div>` : ''}</div>${pageFoot()}`;
 }
 
 /* --- Brassins (historique) --- */
+function emptyBrewExtraNotes() {
+  return {
+    qtyActual: {},
+    qtyExtra: [],
+    temp: {},
+    ph: {mashBefore: '', mashDuring: '', mashEnd: '', spargeWater: '', preBoil: '', postBoil: ''},
+    sg: {preSparge: '', preBoil: '', postBoil: ''},
+    vol: {},
+    free: '',
+  };
+}
+function normalizeBrewExtraNotes(b) {
+  if (!b || typeof b !== 'object') return;
+  const base = emptyBrewExtraNotes();
+  const src = (b.extraNotes && typeof b.extraNotes === 'object') ? b.extraNotes : {};
+  const mapVals = (obj) => {
+    const out = {};
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      Object.keys(obj).forEach(k => { if (obj[k] != null && obj[k] !== '') out[k] = obj[k]; });
+    }
+    return out;
+  };
+  const ph = {...base.ph};
+  const phSrc = (src.ph && typeof src.ph === 'object') ? src.ph : {};
+  Object.keys(ph).forEach(k => { if (phSrc[k] != null && phSrc[k] !== '') ph[k] = phSrc[k]; });
+  const sg = {...base.sg};
+  const sgSrc = (src.sg && typeof src.sg === 'object') ? src.sg : {};
+  Object.keys(sg).forEach(k => { if (sgSrc[k] != null && sgSrc[k] !== '') sg[k] = sgSrc[k]; });
+  let free = src.free != null ? String(src.free) : '';
+  // Ancien format (textes libres par catégorie) → basculé dans les notes libres
+  if (src.qty && typeof src.qty === 'object' && !Array.isArray(src.qty) && ('ferm' in src.qty || 'hop' in src.qty)) {
+    const bits = [['Malts', src.qty.ferm], ['Houblons', src.qty.hop], ['Levure', src.qty.yeast], ['Autre', src.qty.misc]]
+      .filter(([, v]) => String(v || '').trim()).map(([l, v]) => l + ' : ' + String(v).trim());
+    if (bits.length) free = (free ? free + '\n\n' : '') + bits.join('\n');
+  }
+  const temp = mapVals(src.temp);
+  // Ancienne clé unique « mash » → premier palier si présent
+  if (temp.mash != null && temp.mash !== '' && temp['mash.0'] == null) temp['mash.0'] = temp.mash;
+  const vol = mapVals(src.vol);
+  b.extraNotes = {
+    qtyActual: mapVals(src.qtyActual),
+    qtyExtra: Array.isArray(src.qtyExtra) ? src.qtyExtra.map(x => ({
+      name: x?.name != null ? String(x.name) : '',
+      unit: x?.unit != null ? String(x.unit) : '',
+      planned: x?.planned != null && x.planned !== '' ? x.planned : '',
+      actual: x?.actual != null && x.actual !== '' ? x.actual : '',
+    })) : [],
+    temp, ph, sg, vol, free,
+  };
+}
+function brewExtraHasVal(v) { return v != null && String(v).trim() !== ''; }
+function brewExtraNotesFilled(b) {
+  if (!b?.extraNotes) return false;
+  const e = b.extraNotes;
+  if (Object.values(e.qtyActual || {}).some(brewExtraHasVal)) return true;
+  if ((e.qtyExtra || []).some(x => brewExtraHasVal(x.name) || brewExtraHasVal(x.actual) || brewExtraHasVal(x.planned))) return true;
+  if ([e.temp, e.ph, e.sg, e.vol].some(g => g && Object.values(g).some(brewExtraHasVal))) return true;
+  return brewExtraHasVal(e.free);
+}
+function brewSnapCalc(b) {
+  const r = b?.snap && typeof b.snap === 'object' ? b.snap : null;
+  if (!r) return {r: null, c: null};
+  try { return {r, c: calc(r)}; } catch { return {r, c: null}; }
+}
+function brewExtraQtyPlan(b) {
+  const {r} = brewSnapCalc(b);
+  if (!r) return [];
+  const rows = [];
+  (r.ferm || []).forEach((x, i) => {
+    const g = lib('ferm', x.ref);
+    rows.push({k: 'ferm.' + i, label: g?.name || 'Fermentescible', planned: N(x.kg), unit: 'kg', plannedTxt: f(N(x.kg), 3) + ' kg'});
+  });
+  (r.hops || []).forEach((x, i) => {
+    const h = lib('hop', x.ref);
+    const use = USE_H[x.use] ? ' · ' + USE_H[x.use] : '';
+    rows.push({k: 'hops.' + i, label: (h?.name || 'Houblon') + use, planned: N(x.g), unit: 'g', plannedTxt: f(N(x.g), 1) + ' g'});
+  });
+  (r.yeast || []).forEach((x, i) => {
+    const y = lib('yeast', x.ref);
+    rows.push({k: 'yeast.' + i, label: y?.name || 'Levure', planned: N(x.qty), unit: '×', plannedTxt: f(N(x.qty), 1) + ' ×'});
+  });
+  (r.misc || []).forEach((x, i) => {
+    const m = lib('misc', x.ref);
+    const unit = m?.unit || '';
+    rows.push({k: 'misc.' + i, label: m?.name || 'Divers', planned: N(x.qty), unit, plannedTxt: f(N(x.qty), 2) + (unit ? ' ' + unit : '')});
+  });
+  return rows;
+}
+function brewExtraTempPlan(b) {
+  const {r, c} = brewSnapCalc(b);
+  const rows = [];
+  if (c && c.kgMash > 0) rows.push({k: 'strike', label: 'Eau d’empâtage (strike)', planned: rnd(c.strike, 0), plannedTxt: f(c.strike, 0) + ' °C'});
+  (r?.mash || []).forEach((s, i) => rows.push({k: 'mash.' + i, label: s.name || ('Palier ' + (i + 1)), planned: N(s.temp), plannedTxt: f(N(s.temp), 0) + ' °C'}));
+  if (c && c.sparge > 0) rows.push({k: 'sparge', label: 'Rinçage', planned: 78, plannedTxt: '78 °C'});
+  rows.push({k: 'boil', label: 'Ébullition', planned: 100, plannedTxt: '100 °C'});
+  rows.push({k: 'postBoil', label: 'Après ébullition', planned: '', plannedTxt: '—'});
+  const ft = r?.ferment?.[0] != null && r.ferment[0].temp !== '' && r.ferment[0].temp != null ? N(r.ferment[0].temp) : '';
+  rows.push({k: 'chilled', label: 'Après refroidissement', planned: ft, plannedTxt: ft === '' ? '—' : f(ft, 0) + ' °C'});
+  return rows;
+}
+function brewExtraVolPlan(b) {
+  const {c} = brewSnapCalc(b);
+  if (!c) {
+    return [
+      {k: 'preSparge', label: 'Avant rinçage', plannedTxt: '—'},
+      {k: 'spargeWater', label: 'Eau de rinçage', plannedTxt: '—'},
+      {k: 'preBoil', label: 'Avant ébullition', plannedTxt: '—'},
+      {k: 'postBoil', label: 'Après ébullition', plannedTxt: '—'},
+      {k: 'fermenter', label: 'Dans le fermenteur', plannedTxt: '—'},
+      {k: 'packaging', label: 'Final au conditionnement', plannedTxt: '—'},
+    ];
+  }
+  const mashVol = c.mashSteps.length ? c.mashSteps[c.mashSteps.length - 1].volume : c.mashWater;
+  const postBoil = (c.V + c.P.trub) / (1 - c.P.shrink / 100);
+  return [
+    {k: 'preSparge', label: 'Avant rinçage', planned: rnd(mashVol, 1), plannedTxt: f(mashVol, 1) + ' L'},
+    {k: 'spargeWater', label: 'Eau de rinçage', planned: rnd(c.sparge, 1), plannedTxt: f(c.sparge, 1) + ' L'},
+    {k: 'preBoil', label: 'Avant ébullition', planned: rnd(c.preboil, 1), plannedTxt: f(c.preboil, 1) + ' L'},
+    {k: 'postBoil', label: 'Après ébullition', planned: rnd(postBoil, 1), plannedTxt: f(postBoil, 1) + ' L'},
+    {k: 'fermenter', label: 'Dans le fermenteur', planned: rnd(c.V, 1), plannedTxt: f(c.V, 1) + ' L'},
+    {k: 'packaging', label: 'Final au conditionnement', planned: rnd(c.V, 1), plannedTxt: f(c.V, 1) + ' L'},
+  ];
+}
+function brewExtraSgPlan(b) {
+  const {c} = brewSnapCalc(b);
+  return [
+    {k: 'preSparge', label: 'Avant rinçage', plannedTxt: '—'},
+    {k: 'preBoil', label: 'Avant ébullition', plannedTxt: c ? gPrimaryText(c.pbSG) : '—'},
+    {k: 'postBoil', label: 'Après ébullition', plannedTxt: c ? gPrimaryText(c.og) : '—'},
+  ];
+}
+const BREW_PH_ROWS = [
+  {k: 'mashBefore', label: 'Maische avant brassage', rec: '—'},
+  {k: 'mashDuring', label: 'Maische pendant (~15 min)', rec: '5,2–5,6 (idéal 5,2–5,4 pâles · 5,4–5,6 foncées)'},
+  {k: 'mashEnd', label: 'Maische fin de brassage', rec: '5,2–5,6'},
+  {k: 'spargeWater', label: 'Eau de rinçage', rec: '≤ 6,0 (souvent 5,5–6,0 acidifiée)'},
+  {k: 'preBoil', label: 'Avant ébullition', rec: '≈ 5,2–5,6'},
+  {k: 'postBoil', label: 'Après ébullition', rec: '≈ 5,0–5,4'},
+];
+function brewXnNum(attrs, val) {
+  return `<input ${attrs} data-t="n" inputmode="decimal" value="${esc(val ?? '')}">`;
+}
+function brewExtraQtyExtraRow(x = {}) {
+  return `<tr data-xn-extra>
+    <td><input data-xn-en placeholder="Ingrédient" aria-label="Ingrédient ajouté" value="${esc(x.name || '')}"></td>
+    <td class="xn-planned" data-label="Q prévu"><input data-xn-ep data-t="n" inputmode="decimal" aria-label="Q prévu" value="${esc(x.planned ?? '')}"> <input data-xn-eu placeholder="u" aria-label="Unité" value="${esc(x.unit || '')}"></td>
+    <td class="xn-actual" data-label="Q réel"><input data-xn-ea data-t="n" inputmode="decimal" aria-label="Q réel" value="${esc(x.actual ?? '')}"></td>
+    <td class="xn-actions"><button type="button" class="ico" data-act="xnRmQty" aria-label="Retirer">✕</button></td>
+  </tr>`;
+}
+/** Sous-formulaire dépliable « Autres notes » (si activé dans Compte). */
+function brewExtraNotesHTML(b) {
+  normalizeBrewExtraNotes(b);
+  const e = b.extraNotes, open = brewExtraNotesFilled(b) ? ' open' : '';
+  const qtyRows = brewExtraQtyPlan(b);
+  const qtyExtras = [...(e.qtyExtra || []), {}];
+  const qtyBody = qtyRows.map(row => `<tr>
+      <td>${esc(row.label)}</td>
+      <td class="xn-planned" data-label="Q prévu">${esc(row.plannedTxt)}</td>
+      <td class="xn-actual" data-label="Q réel">${brewXnNum(`data-xn-qty="${esc(row.k)}" aria-label="Q réel ${esc(row.label)}"`, e.qtyActual[row.k])}</td>
+      <td class="xn-actions"></td>
+    </tr>`).join('') + qtyExtras.map(brewExtraQtyExtraRow).join('');
+  const tempBody = brewExtraTempPlan(b).map(row => `<tr>
+      <td>${esc(row.label)}</td>
+      <td class="xn-planned" data-label="T° prévu">${esc(row.plannedTxt)}</td>
+      <td class="xn-actual" data-label="T° réel">${brewXnNum(`data-xn-temp="${esc(row.k)}" aria-label="T° réel ${esc(row.label)}"`, e.temp[row.k])}</td>
+    </tr>`).join('');
+  const volBody = brewExtraVolPlan(b).map(row => `<tr>
+      <td>${esc(row.label)}</td>
+      <td class="xn-planned" data-label="Vol. prévu">${esc(row.plannedTxt)}</td>
+      <td class="xn-actual" data-label="Vol. réel">${brewXnNum(`data-xn-vol="${esc(row.k)}" aria-label="Vol. réel ${esc(row.label)}"`, e.vol[row.k])}</td>
+    </tr>`).join('');
+  const sgBody = brewExtraSgPlan(b).map(row => `<tr>
+      <td>${esc(row.label)}</td>
+      <td class="xn-planned" data-label="Prévu">${esc(row.plannedTxt)}</td>
+      <td class="xn-actual" data-label="Réel">${brewXnNum(`data-f="xn.sg.${esc(row.k)}" aria-label="Densité réelle ${esc(row.label)}"`, e.sg[row.k])}</td>
+    </tr>`).join('');
+  const phBody = BREW_PH_ROWS.map(row => `<tr>
+      <td>${esc(row.label)}<div class="brew-xn-rec">${esc(row.rec)}</div></td>
+      <td class="xn-actual" data-label="pH réel">${brewXnNum(`data-f="xn.ph.${esc(row.k)}" aria-label="pH ${esc(row.label)}"`, e.ph[row.k])}</td>
+    </tr>`).join('');
+  return `<details class="brew-extra"${open}>
+    <summary>Autres notes</summary>
+    <p class="sub" style="margin:.2rem 0 .5rem">Relevés optionnels du jour de brassage. Les densités principales (DI / DF mesurées) restent ci-dessus. Les valeurs « prévu » viennent de la recette enregistrée.</p>
+    <h3>Quantités</h3>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>Ingrédient</th><th class="xn-planned">Q prévu</th><th class="xn-actual">Q réel</th><th class="xn-actions"></th></tr></thead>
+      <tbody id="xn-qty-body">${qtyBody}</tbody></table></div>
+    <div class="dlg-actions" style="justify-content:flex-start;margin:.2rem 0 .5rem"><button type="button" class="btn ghost sm" data-act="xnAddQty">+ Ingrédient</button></div>
+    <h3>Températures (°C)</h3>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>Étape</th><th class="xn-planned">T° prévu</th><th class="xn-actual">T° réel</th></tr></thead><tbody>${tempBody}</tbody></table></div>
+    <h3>pH</h3>
+    <p class="sub" style="margin:.1rem 0 .35rem">Mesures à température ambiante (~20 °C). Recommandations indicatives (brassage amateur).</p>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>Mesure</th><th class="xn-actual">pH réel</th></tr></thead><tbody>${phBody}</tbody></table></div>
+    <h3>Densités</h3>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>Mesure</th><th class="xn-planned">Prévu</th><th class="xn-actual">Réel</th></tr></thead><tbody>${sgBody}</tbody></table></div>
+    <h3>Volumes (L)</h3>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>Mesure</th><th class="xn-planned">Vol. prévu</th><th class="xn-actual">Vol. réel</th></tr></thead><tbody>${volBody}</tbody></table></div>
+    <h3>Autres notes de brassage</h3>
+    <div class="fgrid"><label class="fld full"><span>Notes libres</span><textarea id="xn-free" data-f="xn.free">${esc(e.free)}</textarea></label></div>
+  </details>`;
+}
+function readBrewExtraFromDlg() {
+  const e = emptyBrewExtraNotes();
+  document.querySelectorAll('#dlg [data-xn-qty]').forEach(el => {
+    e.qtyActual[el.dataset.xnQty] = el.value === '' ? '' : N(el.value);
+  });
+  document.querySelectorAll('#dlg tr[data-xn-extra]').forEach(tr => {
+    const name = tr.querySelector('[data-xn-en]')?.value || '';
+    const unit = tr.querySelector('[data-xn-eu]')?.value || '';
+    const ep = tr.querySelector('[data-xn-ep]');
+    const ea = tr.querySelector('[data-xn-ea]');
+    const planned = ep && ep.value !== '' ? N(ep.value) : '';
+    const actual = ea && ea.value !== '' ? N(ea.value) : '';
+    if (!name.trim() && planned === '' && actual === '' && !unit.trim()) return;
+    e.qtyExtra.push({name, unit, planned, actual});
+  });
+  document.querySelectorAll('#dlg [data-xn-temp]').forEach(el => {
+    e.temp[el.dataset.xnTemp] = el.value === '' ? '' : N(el.value);
+  });
+  document.querySelectorAll('#dlg [data-xn-vol]').forEach(el => {
+    e.vol[el.dataset.xnVol] = el.value === '' ? '' : N(el.value);
+  });
+  document.querySelectorAll('#dlg [data-f^="xn.ph."], #dlg [data-f^="xn.sg."], #dlg [data-f="xn.free"]').forEach(el => {
+    const path = el.dataset.f.slice(3).split('.');
+    let t = e;
+    for (let i = 0; i < path.length - 1; i++) t = t[path[i]];
+    const last = path[path.length - 1];
+    t[last] = el.dataset.t === 'n' ? (el.value === '' ? '' : N(el.value)) : el.value;
+  });
+  return e;
+}
 function brewCalc(b) {
   const og = b.ogM, fg = b.fgM, has = og > 1 && fg > 0.99;
   const abv = has ? (og - fg) * 131.25 : null, att = has && og > 1 ? (og - fg) / (og - 1) * 100 : null;
@@ -840,8 +1262,9 @@ function viewBrews() {
       <dt>Réfractomètre non corrigé</dt><dd>≈ ${f(rawBrixAtFG(b.ogM > 1 ? b.ogM : b.stats.og, b.fgM > 0.99 ? b.fgM : b.stats.fg), 1)} °Bx</dd>
       <dt>Alcool réel</dt><dd>${k.abv === null ? '–' : f(k.abv, 1) + ' %'}</dd><dt>Atténuation</dt><dd>${k.att === null ? '–' : f(k.att, 0) + ' %'}</dd><dt>Rendement réel</dt><dd>${k.eff === null ? '–' : f(k.eff, 0) + ' %'}</dd></dl>
     ${b.notes ? `<p class="sub" style="white-space:pre-wrap">${esc(b.notes)}</p>` : ''}
+    ${D.prefs.brewExtraNotes && brewExtraNotesFilled(b) ? '<p class="brew-extra-chip">Autres notes renseignées</p>' : ''}
     <div class="dlg-actions" style="justify-content:flex-start"><button class="btn ghost sm" data-act="editBrew" data-id="${b.id}">Modifier</button><button class="btn danger sm" data-act="delBrew" data-id="${b.id}">Supprimer</button></div></div>`; }).join('')}</div>`
-    : '<div class="empty">Aucun brassage enregistré.<br>Depuis une recette, utilisez « Enregistrer un brassage ».</div>'}`;
+    : '<div class="empty">Aucun brassage enregistré.<br>Depuis une recette, utilisez « Enregistrer un brassage ».</div>'}${pageFoot()}`;
 }
 
 /* --- Bibliothèque d'ingrédients --- */
@@ -893,7 +1316,7 @@ function viewIngs() {
   ${showArch ? '<p class="sub" style="margin-top:-.4rem">Retirés de la bibliothèque active, mais toujours utilisables dans les recettes qui les référencent déjà. Restaurez-les pour les proposer à nouveau.</p>' : ''}
   ${l.length ? `<div class="scroll"><table class="tbl"><thead><tr><th data-act="ingSort" data-k="name" style="cursor:pointer">Nom${ingSortArrow('name')}</th>${C.slice(1).map(c => `<th>${c[0]}</th>`).join('')}${stockable ? `<th data-act="ingSort" data-k="stock" style="cursor:pointer">Stock${ingSortArrow('stock')}</th>` : ''}<th></th></tr></thead>${sortIng(l, stockable).map(x => `<tr>${C.map(c => `<td>${c[1](x)}</td>`).join('')}${stockable ? `<td><input inputmode="decimal" data-stock="${x.id}" value="${D.stock[x.id] === undefined ? '' : esc(D.stock[x.id])}" placeholder="—" aria-label="Stock ${esc(x.name)}" style="max-width:6.5rem"></td>` : ''}<td style="white-space:nowrap;text-align:right">${showArch
     ? `<button class="btn ghost sm" data-act="restoreIng" data-id="${x.id}">Restaurer</button>`
-    : `<button class="btn ghost sm" data-act="editIng" data-id="${x.id}">Modifier</button> <button class="btn ghost sm" data-act="dupIng" data-id="${x.id}">Copier</button> <button class="ico" data-act="delIng" data-id="${x.id}" aria-label="Retirer">✕</button>`}</td></tr>`).join('')}</table></div>` : ''}</div>`;
+    : `<button class="btn ghost sm" data-act="editIng" data-id="${x.id}">Modifier</button> <button class="btn ghost sm" data-act="dupIng" data-id="${x.id}">Copier</button> <button class="ico" data-act="delIng" data-id="${x.id}" aria-label="Retirer">✕</button>`}</td></tr>`).join('')}</table></div>` : ''}</div>${pageFoot()}`;
 }
 
 /* --- Profils matériel --- */
@@ -907,22 +1330,33 @@ function viewProfiles() {
     <dl class="kv"><dt>Volume final</dt><dd>${f(p.batch, 1)} L</dd><dt>Ébullition</dt><dd>${f(p.boil, 0)} min</dd><dt>Évaporation</dt><dd>${f(p.evap, 1)} L/h</dd><dt>Pertes trub</dt><dd>${f(p.trub, 1)} L</dd><dt>Pertes empâtage</dt><dd>${f(p.mashLoss, 1)} L</dd>
     <dt>Absorption drêches</dt><dd>${f(p.absorb, 2)} L/kg</dd><dt>Rapport eau/grain</dt><dd>${f(p.ratio, 1)} L/kg</dd><dt>Eau d’infusion</dt><dd>${f(p.infusionTemp, 0)} °C</dd><dt>Contraction</dt><dd>${f(p.shrink, 1)} %</dd><dt>Rendement</dt><dd>${f(p.eff, 0)} %</dd>
     <dt>Méthode</dt><dd>${esc((BREW_METHOD.find(([k]) => k === p.mashMethod) || BREW_METHOD[0])[1])}</dd>${p.mashMethod === 'biab' ? `<dt>Pressurage du sac</dt><dd>${p.biabSqueeze ? 'Oui' : 'Non'}</dd>` : ''}</dl>
-    <div class="dlg-actions" style="justify-content:flex-start"><button class="btn ghost sm" data-act="editProfile" data-id="${p.id}">Modifier</button><button class="btn ghost sm" data-act="dupProfile" data-id="${p.id}">Dupliquer</button><button class="btn danger sm" data-act="delProfile" data-id="${p.id}">Supprimer</button></div></div>`).join('') || '<div class="empty">Aucun profil.</div>'}</div>`;
+    <div class="dlg-actions" style="justify-content:flex-start"><button class="btn ghost sm" data-act="editProfile" data-id="${p.id}">Modifier</button><button class="btn ghost sm" data-act="dupProfile" data-id="${p.id}">Dupliquer</button><button class="btn danger sm" data-act="delProfile" data-id="${p.id}">Supprimer</button></div></div>`).join('') || '<div class="empty">Aucun profil.</div>'}</div>${pageFoot()}`;
 }
 
 /* --- Compte --- */
 function viewAccount() {
   return `<div class="bar"><h1>Compte</h1></div>
-  <div class="card"><div style="display:flex;gap:.8rem;align-items:center">${avatarHTML('lg')}<div><h2 style="margin:0">${esc(USER)}</h2><p class="sub" style="margin:.1rem 0 0">${D.recipes.length} recette(s) · ${D.brews.length} brassage(s) · ${D.profiles.length} profil(s) matériel</p></div></div>
-    <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:.8rem 0 0"><button class="btn ghost sm" data-act="logout">Se déconnecter</button></div></div>
+  <div class="card"><div class="account-id">${avatarHTML('lg')}<div><h2 style="margin:0">${esc(USER)}</h2><p class="sub" style="margin:.1rem 0 0">${D.recipes.length} recette(s) · ${D.brews.length} brassage(s) · ${D.profiles.length} profil(s) matériel</p></div></div>
+    <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:.8rem 0 0">
+      <a class="btn ghost sm" href="help.html" style="text-decoration:none">Aide</a>
+      ${AUTH.mode === 'phpbb'
+      ? '<a class="btn ghost sm" href="/forum/" style="text-decoration:none">Retour sur le forum</a>'
+      : '<button class="btn ghost sm" data-act="logout">Se déconnecter</button>'}</div></div>
   <div class="card"><h2>Avatar</h2>
-    <p class="sub" style="margin-top:0">Choisissez un emoji ou importez une photo (recadrée et réduite automatiquement).</p>
+    ${AUTH.mode === 'phpbb'
+      ? `<p class="sub" style="margin-top:0">Avatar du compte forum${AUTH.avatar_url ? '' : ' (aucun avatar défini sur le forum)'}. Vous pouvez le changer dans le profil phpBB, ou importer une photo locale HopHop ci-dessous.</p>
+        <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0">
+          <button class="btn ghost sm" data-act="avatarUpload">Importer une photo HopHop</button>
+          <input type="file" id="avatarFile" accept="image/*" style="display:none">
+          ${D.prefs.avatarType === 'image' ? '<button class="btn ghost sm" data-act="avatarReset">Revenir à l’avatar forum</button>' : ''}
+        </div>`
+      : `<p class="sub" style="margin-top:0">Choisissez un emoji ou importez une photo (recadrée et réduite automatiquement).</p>
     <div class="avatar-picks">${AVATAR_PICKS.map(e => `<button data-act="setAvatarEmoji" data-v="${e}" aria-pressed="${D.prefs.avatarType === 'emoji' && D.prefs.avatarEmoji === e}">${e}</button>`).join('')}</div>
     <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0">
       <button class="btn ghost sm" data-act="avatarUpload">Importer une photo</button>
       <input type="file" id="avatarFile" accept="image/*" style="display:none">
       ${D.prefs.avatarType === 'image' ? '<button class="btn ghost sm" data-act="avatarReset">Revenir à l’emoji</button>' : ''}
-    </div></div>
+    </div>`}</div>
   <div class="card"><h2>Apparence</h2>
     <h3>Thème</h3><div class="seg">${THEMES.map(([k, l]) => `<button data-act="setTheme" data-v="${k}" aria-pressed="${D.prefs.theme === k}">${l}</button>`).join('')}</div>
     <h3>Mode d’affichage</h3><div class="seg">
@@ -939,15 +1373,23 @@ function viewAccount() {
       <button data-act="setRefract" data-v="linear" aria-pressed="${D.prefs.refractFormula !== 'cubic'}">Sean Terrill (linéaire)</button>
       <button data-act="setRefract" data-v="cubic" aria-pressed="${D.prefs.refractFormula === 'cubic'}">Cubique</button></div>
     <p class="sub" style="margin-bottom:0">La formule linéaire convient à la plupart des densités ; la cubique est recommandée au-delà d’environ 1,080 de densité initiale (bières fortes).</p></div>
+  <div class="card"><h2>Brassins</h2>
+    <p class="sub" style="margin-top:0">Sous-formulaire « Autres notes » à l’édition d’un brassage : quantités réelles, températures, pH, densités et volumes du jour de brassage.</p>
+    <div class="seg">
+      <button data-act="setBrewExtra" data-v="1" aria-pressed="${D.prefs.brewExtraNotes === true}">Activé</button>
+      <button data-act="setBrewExtra" data-v="0" aria-pressed="${D.prefs.brewExtraNotes !== true}">Désactivé</button>
+    </div>
+    <p class="sub" style="margin-bottom:0">Désactivé par défaut. Les notes déjà saisies restent enregistrées si vous désactivez l’option.</p></div>
   <div class="card"><h2>Sauvegarde</h2><p class="sub" style="margin-top:0">Vos données vivent sur ce serveur. Exportez tout de même une sauvegarde JSON de temps en temps, et importez-la pour restaurer un état antérieur.</p>
     <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0"><button class="btn ghost sm" data-act="backup">Exporter la sauvegarde</button><button class="btn ghost sm" data-act="restore">Importer une sauvegarde</button><input type="file" id="restoreFile" accept=".json,application/json" style="display:none"></div></div>
-  <div class="card"><h2>Zone sensible</h2><button class="btn danger sm" data-act="delAccount">Supprimer ce compte et ses données</button></div>`;
+  ${AUTH.features.delete_account ? '<div class="card"><h2>Zone sensible</h2><button class="btn danger sm" data-act="delAccount">Supprimer ce compte et ses données</button></div>' : ''}
+  ${pageFoot()}`;
 }
 
 /* --- Rendu général --- */
 function render() {
   const app = $('#app');
-  if (!USER) { app.innerHTML = authHTML(); return; }
+  if (!USER || !D) { app.innerHTML = authHTML(); return; }
   app.innerHTML = shellHTML(); renderMain();
 }
 function renderMain(keep) {
@@ -995,6 +1437,7 @@ const scaleRecipe = (r, nv) => {
 function createBrew(r, date) {
   const c = calc(r);
   const b = {id: uid(), recipeId: r.id, recipeName: r.name, date, status: 'brewed', ogM: 0, fgM: 0, vol: N(r.batch), notes: '', tasting: '',
+    extraNotes: emptyBrewExtraNotes(),
     stats: {og: c.og, fg: c.fg, abv: c.abv, ibu: c.ibu, ebc: c.ebc, potGrain: c.potGrain, potOther: c.potOther}, snap: clone(r)};
   D.brews.push(b); persist();
   return b;
@@ -1026,6 +1469,24 @@ function openStockDeductDialog(r) {
   }, '<p class="sub">Préremplies avec les quantités de la recette — ajustez si vous avez utilisé plus ou moins, puis validez la sortie de stock.</p>');
 }
 const brewFields = [{k: 'date', l: 'Date de brassage', t: 'date'}, {k: 'deduct', l: 'Décompter les ingrédients du stock (uniquement ceux suivis)', t: 'check'}];
+const brewEditFields = [
+  {k: 'date', l: 'Date', t: 'date'},
+  {k: 'status', l: 'Statut', t: 'select', o: Object.entries(STATUS)},
+  {k: 'ogM', l: 'Densité initiale mesurée', t: 'number'},
+  {k: 'fgM', l: 'Densité finale mesurée', t: 'number'},
+  {k: 'vol', l: 'Volume obtenu (L)', t: 'number'},
+  {k: 'notes', l: 'Notes de brassage', t: 'textarea'},
+  {k: 'tasting', l: 'Dégustation', t: 'textarea'},
+];
+const brewEditHelp = '<p class="sub">Saisissez les densités au format 1.052 (ou 1,052). Le rendement réel est calculé à partir de la densité initiale et du volume obtenu.</p>';
+/** Sous le formulaire d’édition : Autres notes (si activé) ou rappel Compte. */
+function brewFormExtraNotesHTML(b) {
+  if (D.prefs.brewExtraNotes === true) {
+    normalizeBrewExtraNotes(b);
+    return brewExtraNotesHTML(b);
+  }
+  return '<p class="brew-extra-hint">Autres notes activables dans l’onglet <button type="button" data-act="go" data-v="account">Compte</button>.</p>';
+}
 const profDefaults = () => ({name: 'Nouveau profil', batch: 20, boil: 60, evap: 3, trub: 1.5, mashLoss: 1, absorb: 1, ratio: 3, infusionTemp: 96, shrink: 4, eff: 72, mashMethod: 'classic', biabSqueeze: false});
 
 const ACT = {
@@ -1034,10 +1495,13 @@ const ACT = {
   setDensity: el => { D.prefs.density = el.dataset.v; applyPrefs(); persist(); renderMain(true); },
   setUnit: el => { D.prefs.unitPrimary = el.dataset.v; persist(); renderMain(true); },
   setRefract: el => { D.prefs.refractFormula = el.dataset.v; persist(); renderMain(true); },
+  setBrewExtra: el => { D.prefs.brewExtraNotes = el.dataset.v === '1'; persist(); renderMain(true); },
+  xnAddQty: () => { const tb = $('#xn-qty-body'); if (tb) tb.insertAdjacentHTML('beforeend', brewExtraQtyExtraRow()); },
+  xnRmQty: el => { const tr = el.closest('tr'); if (tr) tr.remove(); },
   setAvatarEmoji: el => { D.prefs.avatarType = 'emoji'; D.prefs.avatarEmoji = el.dataset.v; persist(); renderMain(true); },
   avatarUpload: () => $('#avatarFile').click(),
   avatarReset: () => { D.prefs.avatarType = 'emoji'; D.prefs.avatarImage = ''; persist(); renderMain(true); },
-  go: el => { ui.view = el.dataset.v; renderMain(); window.scrollTo(0, 0); },
+  go: el => { closeDlg(); ui.view = el.dataset.v; renderMain(); window.scrollTo(0, 0); },
   dlgClose: () => closeDlg(), dlgSave: () => dlgSave && dlgSave(),
   newRecipe: () => { const r = newRecipe(); D.recipes.push(r); ui.rid = r.id; ui.view = 'editor'; persist(); renderMain(); window.scrollTo(0, 0); },
   open: el => { ui.rid = el.dataset.id; ui.view = 'editor'; renderMain(); window.scrollTo(0, 0); },
@@ -1065,6 +1529,8 @@ const ACT = {
     D.recipes.push(c); ui.rid = c.id; persist(); renderMain(); window.scrollTo(0, 0); toast('Copie redimensionnée créée');
   },
   exp: el => showExport(el.dataset.k),
+  shareBrewRecipes: () => shareToBrewRecipes(),
+  pickBrewRecipesStyle: () => openBrewRecipesStylePicker(),
   brewFrom: () => openForm('Enregistrer un brassage', brewFields, {date: today(), deduct: false}, v => {
     const r = R(); createBrew(r, v.date || today());
     if (v.deduct) { openStockDeductDialog(r); return false; }
@@ -1081,10 +1547,14 @@ const ACT = {
   },
   editBrew: el => {
     const b = D.brews.find(x => x.id === el.dataset.id);
-    openForm(b.recipeName, [{k: 'date', l: 'Date', t: 'date'}, {k: 'status', l: 'Statut', t: 'select', o: Object.entries(STATUS)}, {k: 'ogM', l: 'Densité initiale mesurée', t: 'number'}, {k: 'fgM', l: 'Densité finale mesurée', t: 'number'},
-      {k: 'vol', l: 'Volume obtenu (L)', t: 'number'}, {k: 'notes', l: 'Notes de brassage', t: 'textarea'}, {k: 'tasting', l: 'Dégustation', t: 'textarea'}], b,
-      v => { Object.assign(b, v); persist(); renderMain(true); },
-      `<p class="sub">Saisissez les densités au format 1.052 (ou 1,052). Le rendement réel est calculé à partir de la densité initiale et du volume obtenu.</p>`);
+    normalizeBrewExtraNotes(b);
+    openForm(b.recipeName, brewEditFields, b,
+      v => {
+        b.date = v.date; b.status = v.status; b.ogM = v.ogM; b.fgM = v.fgM; b.vol = v.vol; b.notes = v.notes; b.tasting = v.tasting;
+        if (D.prefs.brewExtraNotes === true) b.extraNotes = readBrewExtraFromDlg();
+        persist(); renderMain(true);
+      },
+      brewEditHelp + brewFormExtraNotesHTML(b));
   },
   delBrew: el => ask('Supprimer ce brassage de l’historique ?', 'Supprimer', () => { D.brews = D.brews.filter(x => x.id !== el.dataset.id); persist(); renderMain(true); }),
   ingTab: el => { ui.tab = el.dataset.t; renderMain(true); },
@@ -1115,9 +1585,10 @@ document.addEventListener('input', e => {
   if (t.dataset.b) {                                   // champ de la recette en cours d'édition
     const r = R(); if (!r) return;
     setPath(r, t.dataset.b, t.type === 'checkbox' ? t.checked : (t.hasAttribute('data-n') ? N(t.value) : t.value));
+    if (t.dataset.b === 'styleId') { const st = styleById(r.styleId); r.style = st ? st.name : ''; }
     r.updated = Date.now(); persist(); updateStats();
     if (t.dataset.b === 'batch') { const nv = $('#newvol'); if (nv) nv.value = t.value; }
-    if (t.dataset.b === 'mashMethod') { renderMain(true); return; }   // affiche/masque l'option de pressurage du sac (BIAB)
+    if (t.dataset.b === 'mashMethod') { renderMain(true); return; }
     if (t.dataset.b === 'profileId') {                   // reprend les valeurs du nouveau profil (volume, ratio, rendement, eau d'infusion, méthode…)
       const p = D.profiles.find(x => x.id === r.profileId) || DEFAULT_P;
       r.batch = p.batch; r.ratio = p.ratio; r.eff = p.eff; r.infusionTemp = p.infusionTemp; r.mashMethod = p.mashMethod; r.biabSqueeze = p.biabSqueeze;
@@ -1159,13 +1630,16 @@ document.addEventListener('change', e => {
   }
   if (t.id === 'importBeerXMLFile' && t.files[0]) {
     const fr = new FileReader();
-    fr.onload = () => {
+    fr.onload = async () => {
       let added;
       try { added = importBeerXML(fr.result); }
       catch (e) { toast(e.message); return; }
-      persist(); toast(added.length > 1 ? `${added.length} recettes importées` : 'Recette importée');
       if (added.length === 1) { ui.rid = added[0].id; ui.view = 'editor'; renderMain(); window.scrollTo(0, 0); }
       else renderMain(true);
+      const saved = await saveNow();
+      toast(saved
+        ? (added.length > 1 ? `${added.length} recettes importées` : 'Recette importée')
+        : 'Recette ajoutée à l’écran mais non enregistrée sur le serveur.');
     };
     fr.readAsText(t.files[0]); t.value = '';
   }
@@ -1285,18 +1759,28 @@ function importLibraryXML(doc, guide) {
     upsertIng('misc', nm, {unit: xtext(el, 'AMOUNT_IS_WEIGHT').toLowerCase() === 'true' ? 'g' : 'mL'}); counts.misc++;
   });
   doc.querySelectorAll('STYLE').forEach(el => {
-    const nm = xtext(el, 'NAME'); if (!nm) return;
-    const category = (xtext(el, 'CATEGORY_NUMBER') + xtext(el, 'STYLE_LETTER')) || xtext(el, 'CATEGORY');
-    const type = {Lager: 'lager', Ale: 'ale', Mead: 'mead', Wheat: 'ale', Mixed: 'mixed', Cider: 'cider'}[xtext(el, 'TYPE')] || 'other';
-    upsertStyle(nm, guide, {category, type,
-      ogMin: rnd(xnum(el, 'OG_MIN', 1.040), 3), ogMax: rnd(xnum(el, 'OG_MAX', 1.050), 3),
-      fgMin: rnd(xnum(el, 'FG_MIN', 1.008), 3), fgMax: rnd(xnum(el, 'FG_MAX', 1.012), 3),
-      ibuMin: rnd(xnum(el, 'IBU_MIN', 0), 0), ibuMax: rnd(xnum(el, 'IBU_MAX', 0), 0),
-      colorMin: rnd(xnum(el, 'COLOR_MIN', 0) * 1.97, 1), colorMax: rnd(xnum(el, 'COLOR_MAX', 0) * 1.97, 1),
-      abvMin: rnd(xnum(el, 'ABV_MIN', 0), 1), abvMax: rnd(xnum(el, 'ABV_MAX', 0), 1),
-      note: xtext(el, 'NOTES')}); counts.style++;
+    if (upsertStyleFromBeerXmlEl(el, guide)) counts.style++;
   });
   return counts;
+}
+
+/** Crée / met à jour un style HopHop depuis une balise BeerXML STYLE (guide = STYLE_GUIDE ou repli). */
+function upsertStyleFromBeerXmlEl(el, guideFallback) {
+  if (!el) return null;
+  const nm = xtext(el, 'NAME');
+  if (!nm) return null;
+  const guide = xtext(el, 'STYLE_GUIDE') || (guideFallback || '');
+  const category = (xtext(el, 'CATEGORY_NUMBER') + xtext(el, 'STYLE_LETTER')) || xtext(el, 'CATEGORY');
+  const type = {Lager: 'lager', Ale: 'ale', Mead: 'mead', Wheat: 'ale', Mixed: 'mixed', Cider: 'cider'}[xtext(el, 'TYPE')] || 'other';
+  return upsertStyle(nm, guide, {
+    category, type,
+    ogMin: rnd(xnum(el, 'OG_MIN', 1.040), 3), ogMax: rnd(xnum(el, 'OG_MAX', 1.050), 3),
+    fgMin: rnd(xnum(el, 'FG_MIN', 1.008), 3), fgMax: rnd(xnum(el, 'FG_MAX', 1.012), 3),
+    ibuMin: rnd(xnum(el, 'IBU_MIN', 0), 0), ibuMax: rnd(xnum(el, 'IBU_MAX', 0), 0),
+    colorMin: rnd(xnum(el, 'COLOR_MIN', 0) * 1.97, 1), colorMax: rnd(xnum(el, 'COLOR_MAX', 0) * 1.97, 1),
+    abvMin: rnd(xnum(el, 'ABV_MIN', 0), 1), abvMax: rnd(xnum(el, 'ABV_MAX', 0), 1),
+    note: xtext(el, 'NOTES'),
+  });
 }
 
 function importLibraryJSON(data, guide) {
@@ -1396,10 +1880,13 @@ function importBeerXML(text) {
 
   return recipeEls.map(rec => {
     const name = xtext(rec, 'NAME') || 'Recette importée';
-    const style = xtext(rec, 'STYLE > NAME');
+    const styleEl = rec.querySelector(':scope > STYLE') || rec.querySelector('STYLE');
+    const style = styleEl ? xtext(styleEl, 'NAME') : '';
     const equipEl = rec.querySelector('EQUIPMENT');
     const r = newRecipe();
     r.id = uid(); r.name = name; r.style = style;
+    const st = upsertStyleFromBeerXmlEl(styleEl, '');
+    if (st) r.styleId = st.id;
     r.profileId = ensureProfileFromEquipment(equipEl, rec, name);
     const rprof = D.profiles.find(x => x.id === r.profileId) || DEFAULT_P;
     r.ratio = rprof.ratio; r.eff = rprof.eff; r.infusionTemp = rprof.infusionTemp;
@@ -1563,6 +2050,205 @@ function copyText(t) {
   fallbackCopy();
   function fallbackCopy() { const ta = $('#exptxt'); ta.select(); try { document.execCommand('copy'); toast('Copié'); } catch { toast('Sélectionnez le texte et copiez-le manuellement.'); } }
 }
+async function shareToBrewRecipes() {
+  const url = brewrecipesShareUrl();
+  if (!url) { toast('Partage BrewRecipes indisponible.'); return; }
+  const r = R();
+  if (!r) { toast('Ouvrez une recette.'); return; }
+  const xml = toBeerXML(r);
+  toast('Envoi vers BrewRecipes…');
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {'Content-Type': 'application/xml; charset=UTF-8'},
+      body: xml,
+      redirect: 'follow',
+    });
+    if (res.redirected || res.ok) {
+      window.location.href = res.url;
+      return;
+    }
+    const msg = (await res.text()).trim();
+    toast(msg.slice(0, 160) || `Erreur BrewRecipes (${res.status})`);
+  } catch {
+    toast('Impossible de contacter BrewRecipes.');
+  }
+}
+
+/** Sélecteur de style BrewRecipes (guide → liste → Enregistrer). */
+async function openBrewRecipesStylePicker() {
+  const guidesUrl = brewrecipesStyleGuidesUrl(), stylesUrl = brewrecipesStylesUrl();
+  if (!guidesUrl || !stylesUrl) { toast('Catalogue BrewRecipes indisponible.'); return; }
+  const r = R();
+  if (!r) { toast('Ouvrez une recette.'); return; }
+  let stylesCache = [], selectedIdx = null;
+  dlgSave = () => {
+    if (selectedIdx == null || !stylesCache[selectedIdx]) { toast('Choisissez un style dans la liste.'); return; }
+    applyBrewRecipesStyle(stylesCache[selectedIdx]);
+  };
+  showDlg(`<h2>Style BrewRecipes</h2>
+    <p class="sub" style="margin-top:0">Choisissez un guide, puis un style : les données sont copiées dans votre bibliothèque HopHop et associées à cette recette.</p>
+    <label class="sub" for="br-guide">Guide</label>
+    <select id="br-guide" style="width:100%;margin:.3rem 0 .6rem" disabled><option>Chargement…</option></select>
+    <label class="sub" for="br-style-q">Rechercher</label>
+    <input id="br-style-q" type="search" placeholder="Nom, code (ex. IPA, 21A)…" autocomplete="off" disabled style="width:100%;margin:.3rem 0 .6rem">
+    <div id="br-styles" class="sub">Sélectionnez un guide.</div>
+    <div class="dlg-actions"><button class="btn ghost" data-act="dlgClose">Annuler</button><button class="btn" id="br-style-save" data-act="dlgSave" disabled>Enregistrer</button></div>`);
+  const guideEl = $('#br-guide'), listEl = $('#br-styles'), qEl = $('#br-style-q'), saveEl = $('#br-style-save');
+  const syncSave = () => { saveEl.disabled = selectedIdx == null || !stylesCache[selectedIdx]; };
+  const renderStyles = () => {
+    if (!stylesCache.length) { syncSave(); return; }
+    const needle = (qEl.value || '').trim().toLowerCase();
+    const matches = stylesCache
+      .map((s, i) => ({s, i}))
+      .filter(({s}) => !needle || String(s.label || s.name || '').toLowerCase().includes(needle)
+        || String(s.name || '').toLowerCase().includes(needle)
+        || String(s.category || '').toLowerCase().includes(needle));
+    if (selectedIdx != null && !matches.some(m => m.i === selectedIdx)) selectedIdx = null;
+    listEl.innerHTML = matches.length
+      ? `<div style="max-height:16rem;overflow:auto;display:flex;flex-direction:column;gap:.35rem" role="radiogroup" aria-label="Styles">`
+        + matches.map(({s, i}) => `<label class="br-style-row"><input type="radio" name="br-style" value="${i}"${selectedIdx === i ? ' checked' : ''}><span>${esc(s.label || s.name)}</span></label>`).join('')
+        + `</div>`
+      : '<p class="sub" style="margin:0">Aucun style ne correspond.</p>';
+    listEl.querySelectorAll('input[name="br-style"]').forEach(inp => {
+      inp.onchange = () => { selectedIdx = +inp.value; syncSave(); };
+    });
+    syncSave();
+  };
+  qEl.oninput = () => renderStyles();
+  try {
+    const res = await fetch(guidesUrl, {credentials: 'include'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const guides = data.guides || [];
+    if (!guides.length) {
+      guideEl.innerHTML = '<option value="">Aucun guide</option>';
+      listEl.textContent = 'Aucun guide de styles dans BrewRecipes.';
+      return;
+    }
+    guideEl.innerHTML = '<option value="">— Choisir un guide —</option>'
+      + guides.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+    guideEl.disabled = false;
+    const load = async (guide) => {
+      stylesCache = [];
+      selectedIdx = null;
+      qEl.value = '';
+      qEl.disabled = true;
+      syncSave();
+      await loadBrewRecipesStylesList(guide, listEl, stylesUrl, (styles) => {
+        stylesCache = styles || [];
+        qEl.disabled = !stylesCache.length;
+        renderStyles();
+        if (stylesCache.length) qEl.focus();
+      });
+    };
+    const bjcp = guides.find(g => /^BJCP/i.test(g));
+    if (bjcp) { guideEl.value = bjcp; await load(bjcp); }
+    guideEl.onchange = () => load(guideEl.value);
+  } catch {
+    guideEl.innerHTML = '<option value="">Erreur</option>';
+    listEl.textContent = 'Impossible de charger les guides BrewRecipes.';
+  }
+}
+
+async function loadBrewRecipesStylesList(guide, listEl, stylesUrl, onLoaded) {
+  if (!guide) {
+    listEl.innerHTML = '<p class="sub">Sélectionnez un guide.</p>';
+    onLoaded([]);
+    return;
+  }
+  listEl.innerHTML = '<p class="sub">Chargement des styles…</p>';
+  try {
+    const sep = stylesUrl.includes('?') ? '&' : '?';
+    const res = await fetch(stylesUrl + sep + 'guide=' + encodeURIComponent(guide), {credentials: 'include'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const styles = data.styles || [];
+    if (!styles.length) {
+      listEl.innerHTML = '<p class="sub">Aucun style pour ce guide.</p>';
+      onLoaded([]);
+      return;
+    }
+    onLoaded(styles);
+  } catch {
+    listEl.innerHTML = '<p class="sub">Erreur de chargement des styles.</p>';
+    onLoaded([]);
+  }
+}
+
+function applyBrewRecipesStyle(style) {
+  const r = R();
+  if (!r || !style || !style.name) { toast('Style invalide.'); return; }
+  const st = upsertStyle(style.name, style.guide || '', {
+    category: style.category || '',
+    type: style.type || 'other',
+    ogMin: N(style.ogMin), ogMax: N(style.ogMax),
+    fgMin: N(style.fgMin), fgMax: N(style.fgMax),
+    ibuMin: N(style.ibuMin), ibuMax: N(style.ibuMax),
+    colorMin: N(style.colorMin), colorMax: N(style.colorMax),
+    abvMin: N(style.abvMin), abvMax: N(style.abvMax),
+    note: style.note || '',
+  });
+  if (!st) { toast('Impossible d’enregistrer le style.'); return; }
+  r.styleId = st.id;
+  r.style = st.name;
+  r.updated = Date.now();
+  closeDlg();
+  persist();
+  renderMain(true);
+  toast('Style « ' + styleComposite(st) + ' » associé à la recette.');
+}
+/** « 21A » → numéro + lettre. `category` stocke ce code, ou un nom de catégorie s’il n’y a pas de code. */
+function splitStyleCode(category) {
+  const c = String(category || '').trim();
+  const m = c.match(/^(\d{1,3})\s*([A-Za-z])$/);
+  if (m) return {number: m[1], letter: m[2].toUpperCase(), label: ''};
+  if (/^\d{1,3}$/.test(c)) return {number: c, letter: '', label: ''};
+  return {number: '', letter: '', label: c};
+}
+const STYLE_XML_TYPE = {ale: 'Ale', lager: 'Lager', mixed: 'Mixed', cider: 'Cider', mead: 'Mead', other: 'Ale'};
+/** Bloc BeerXML <STYLE> : nom, code (CATEGORY_NUMBER + STYLE_LETTER) et guide, pour que BrewRecipes retrouve le style. */
+function beerXmlStyle(r, X) {
+  const st = recipeStyleRef(r);
+  const name = (st && st.name) || String(r.style || '').trim();
+  if (!name) return '';
+  const code = splitStyleCode(st ? st.category : '');
+  const srm = v => rnd(N(v) / 1.97, 1);
+  let inner = X('NAME', name) + X('VERSION', 1) + X('CATEGORY', code.label);
+  if (code.number) inner += X('CATEGORY_NUMBER', code.number);
+  if (code.letter) inner += X('STYLE_LETTER', code.letter);
+  if (st && st.guide) inner += X('STYLE_GUIDE', st.guide);
+  inner += X('TYPE', STYLE_XML_TYPE[st && st.type] || 'Ale');
+  if (st) {
+    inner += X('OG_MIN', st.ogMin) + X('OG_MAX', st.ogMax) + X('FG_MIN', st.fgMin) + X('FG_MAX', st.fgMax)
+      + X('IBU_MIN', st.ibuMin) + X('IBU_MAX', st.ibuMax)
+      + X('COLOR_MIN', srm(st.colorMin)) + X('COLOR_MAX', srm(st.colorMax))
+      + X('ABV_MIN', st.abvMin) + X('ABV_MAX', st.abvMax);
+    if (st.note) inner += X('NOTES', st.note);
+  }
+  return `<STYLE>${inner}</STYLE>`;
+}
+function beerJsonStyle(r) {
+  const st = recipeStyleRef(r);
+  const name = (st && st.name) || String(r.style || '').trim();
+  if (!name) return null;
+  const code = splitStyleCode(st ? st.category : '');
+  const range = (a, b, unit) => ({minimum: {value: rnd(N(a), 4), unit}, maximum: {value: rnd(N(b), 4), unit}});
+  const style = {name, type: (st && (st.type === 'mead' || st.type === 'cider')) ? st.type : 'beer', category: code.label || name};
+  if (st && st.guide) style.style_guide = st.guide;
+  if (code.number) style.category_number = Number(code.number);
+  if (code.letter) style.style_letter = code.letter;
+  if (st) {
+    style.original_gravity = range(st.ogMin, st.ogMax, 'sg');
+    style.final_gravity = range(st.fgMin, st.fgMax, 'sg');
+    style.international_bitterness_units = range(st.ibuMin, st.ibuMax, 'IBUs');
+    style.color = range(st.colorMin, st.colorMax, 'EBC');
+    style.alcohol_by_volume = range(st.abvMin, st.abvMax, '%');
+    if (st.note) style.notes = st.note;
+  }
+  return style;
+}
 function showExport(kind) {
   const r = R(), xml = kind === 'xml', txt = xml ? toBeerXML(r) : toBeerJSON(r), name = slug(r.name) + (xml ? '.xml' : '.json');
   dlgSave = null;
@@ -1582,21 +2268,24 @@ function toBeerXML(r) {
     return `<MISC>${X('NAME', m.name)}${X('VERSION', 1)}${X('TYPE', 'Other')}${X('USE', {mash: 'Mash', boil: 'Boil', ferm: 'Primary', bottle: 'Bottling'}[x.use])}${X('TIME', N(x.time))}${X('AMOUNT', m.unit === 'g' ? kg(q) : m.unit === 'mL' ? rnd(q / 1000, 5) : q)}${X('AMOUNT_IS_WEIGHT', w ? 'TRUE' : 'FALSE')}</MISC>`; }).filter(Boolean);
   const yeasts = r.yeast.map(x => { const y = lib('yeast', x.ref); return y && `<YEAST>${X('NAME', y.name)}${X('VERSION', 1)}${X('TYPE', y.type === 'lager' ? 'Lager' : 'Ale')}${X('FORM', y.form === 'liquid' ? 'Liquid' : 'Dry')}${X('AMOUNT', rnd(N(x.qty) * 0.0115, 4))}${X('AMOUNT_IS_WEIGHT', 'TRUE')}${X('ATTENUATION', y.att)}${X('MIN_TEMPERATURE', y.tmin)}${X('MAX_TEMPERATURE', y.tmax)}</YEAST>`; }).filter(Boolean);
   const steps = r.mash.map((s, i) => `<MASH_STEP>${X('NAME', s.name)}${X('VERSION', 1)}${X('TYPE', i === 0 ? 'Infusion' : {infusion: 'Infusion', direct: 'Temperature', decoction: 'Decoction'}[s.method || 'infusion'])}${X('STEP_TEMP', N(s.temp))}${X('STEP_TIME', N(s.time))}</MASH_STEP>`);
-  const notes = (recipeStyleName(r) ? 'Style : ' + recipeStyleName(r) + '\n' : '') + r.notes;
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<RECIPES>\n<RECIPE>${X('VERSION', 1)}${X('NAME', r.name)}${X('TYPE', r.ferm.some(x => lib('ferm', x.ref)?.type === 'grain') ? 'All Grain' : 'Extract')}${X('BREWER', USER)}
+  const xmlDecl = '<' + '?xml version="1.0" encoding="UTF-8"?>';
+  return `${xmlDecl}\n<RECIPES>\n<RECIPE>${X('VERSION', 1)}${X('NAME', r.name)}${X('TYPE', r.ferm.some(x => lib('ferm', x.ref)?.type === 'grain') ? 'All Grain' : 'Extract')}${X('BREWER', USER)}
+${beerXmlStyle(r, X)}
 ${X('BATCH_SIZE', rnd(c.V, 2))}${X('BOIL_SIZE', rnd(c.preboil, 2))}${X('BOIL_TIME', P.boil)}${X('EFFICIENCY', rnd(c.effPct, 0))}
 ${sec('HOPS', hops)}${sec('FERMENTABLES', ferm)}${sec('MISCS', miscs)}${sec('YEASTS', yeasts)}
 <EQUIPMENT>${X('NAME', P.name)}${X('VERSION', 1)}${X('BOIL_SIZE', rnd(c.preboil, 2))}${X('BATCH_SIZE', rnd(c.V, 2))}${X('TRUB_CHILLER_LOSS', P.trub)}${X('EVAP_RATE', rnd(P.evap / c.preboil * 100, 2))}${X('BOIL_TIME', P.boil)}</EQUIPMENT>
 <MASH>${X('NAME', 'Empâtage')}${X('VERSION', 1)}${X('GRAIN_TEMP', N(r.grainTemp))}<MASH_STEPS>${steps.join('')}</MASH_STEPS></MASH>
-${X('NOTES', notes)}${X('OG', rnd(c.og, 4))}${X('FG', rnd(c.fg, 4))}${X('IBU', rnd(c.ibu, 1))}${X('EST_ABV', rnd(c.abv, 2))}${X('CARBONATION', N(r.co2))}${X('FERMENTATION_STAGES', r.ferment.length)}
+${X('NOTES', r.notes || '')}${X('OG', rnd(c.og, 4))}${X('FG', rnd(c.fg, 4))}${X('IBU', rnd(c.ibu, 1))}${X('EST_ABV', rnd(c.abv, 2))}${X('CARBONATION', N(r.co2))}${X('FERMENTATION_STAGES', r.ferment.length)}
 ${r.ferment[0] ? X('PRIMARY_AGE', N(r.ferment[0].days)) + X('PRIMARY_TEMP', N(r.ferment[0].temp)) : ''}
 </RECIPE>\n</RECIPES>\n`;
 }
 function toBeerJSON(r) {
   const c = calc(r), P = c.P, q = (v, unit) => ({value: rnd(+v, 4), unit});
   const use = {mash: 'add_to_mash', boil: 'add_to_boil', ferm: 'add_to_fermentation', bottle: 'add_to_package'};
+  const style = beerJsonStyle(r);
   const rec = {
     name: r.name, type: r.ferm.some(x => lib('ferm', x.ref)?.type === 'grain') ? 'all grain' : 'extract', author: USER,
+    ...(style ? {style} : {}),
     batch_size: q(c.V, 'l'), efficiency: {brewhouse: q(c.effPct, '%')},
     boil: {name: 'Ébullition', pre_boil_size: q(c.preboil, 'l'), boil_time: q(P.boil, 'min')},
     ingredients: {
@@ -1615,7 +2304,7 @@ function toBeerJSON(r) {
     mash: {name: 'Empâtage', grain_temperature: q(N(r.grainTemp), 'C'), mash_steps: r.mash.map((s, i) => ({name: s.name, type: i === 0 ? 'infusion' : {infusion: 'infusion', direct: 'temperature', decoction: 'decoction'}[s.method || 'infusion'], step_temperature: q(N(s.temp), 'C'), step_time: q(N(s.time), 'min')}))},
     fermentation: {name: 'Fermentation', fermentation_steps: r.ferment.map(s => ({name: s.name, start_temperature: q(N(s.temp), 'C'), step_time: q(N(s.days), 'day')}))},
     original_gravity: q(c.og, 'sg'), final_gravity: q(c.fg, 'sg'), alcohol_by_volume: q(c.abv, '%'), ibu_estimate: {value: rnd(c.ibu, 1), unit: 'IBUs'}, color_estimate: q(c.ebc, 'EBC'),
-    carbonation: N(r.co2), notes: (recipeStyleName(r) ? 'Style : ' + recipeStyleName(r) + '\n' : '') + r.notes
+    carbonation: N(r.co2), notes: r.notes || ''
   };
   return JSON.stringify({beerjson: {version: 1, recipes: [rec]}}, null, 2);
 }
@@ -1624,9 +2313,20 @@ function toBeerJSON(r) {
 (async function init() {
   try {
     const s = await api('session');
-    if (s.username) await enterApp(s.username);
-    else render();
-  } catch { render(); }
+    applySessionMeta(s);
+    if (s.username) {
+      try { await enterApp(s.username); }
+      catch (e) {
+        USER = D = null;
+        toast(e.message || 'Impossible de charger vos données.');
+        render();
+      }
+    } else render();
+  } catch (e) {
+    USER = D = null;
+    toast(e.message || 'Impossible de contacter le serveur.');
+    render();
+  }
 })();
 </script>
 </body>

@@ -1,0 +1,14 @@
+# Données runtime (comptes, recettes) — voir README
+/data/users.json
+/data/store/*.json
+!/data/store/.gitkeep
+/data/hophop-api.log
+/data/brewrecipes_import/
+
+# Config serveur forum (SSO / MySQL)
+/includes/config.local.php
+
+# macOS / éditeur
+.DS_Store
+.idea/
+.vscode/

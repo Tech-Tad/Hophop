@@ -1,23 +1,120 @@
 <?php
-require_once __DIR__ . '/storage.php';
 
-function uid(): string {
+require_once __DIR__ . '/storage.php';
+require_once __DIR__ . '/user_store.php';
+
+function uid(): string
+{
     return substr(bin2hex(random_bytes(5)), 0, 9);
 }
 
-function get_users(): array { return read_json(USERS_FILE, []); }
-function save_users(array $u): void { write_json(USERS_FILE, $u); }
-function current_user(): ?string { return $_SESSION['user'] ?? null; }
+function hophop_standalone_auth(): bool
+{
+    return hophop_auth_mode() === 'standalone';
+}
 
-function require_login(): void {
-    if (!current_user()) json_fail('Session expirée, reconnectez-vous.', 401);
+function get_users(): array
+{
+    return read_json(USERS_FILE, []);
+}
+
+function save_users(array $u): void
+{
+    write_json(USERS_FILE, $u);
+}
+
+function current_user(): ?string
+{
+    if (hophop_auth_mode() === 'phpbb') {
+        $forum = hophop_forum_user();
+
+        return $forum ? $forum['username'] : null;
+    }
+
+    return $_SESSION['user'] ?? null;
+}
+
+/**
+ * @return array{user_id: int, username: string}|null
+ */
+function hophop_user_context(): ?array
+{
+    if (hophop_auth_mode() === 'phpbb') {
+        return hophop_forum_user();
+    }
+
+    $username = current_user();
+
+    if ($username === null) {
+        return null;
+    }
+
+    return ['user_id' => 0, 'username' => $username];
+}
+
+function require_login(): void
+{
+    if (hophop_auth_mode() === 'phpbb' && hophop_forum_is_bot()) {
+        json_fail('Les robots du forum ne peuvent pas utiliser HopHop.', 403);
+    }
+
+    if (!hophop_user_context()) {
+        json_fail('Session expirée, reconnectez-vous.', 401);
+    }
+}
+
+function hophop_session_payload(): array
+{
+    $username = current_user();
+    $payload = [
+        'username' => $username,
+        'auth_mode' => hophop_auth_mode(),
+        'storage' => hophop_storage(),
+        'features' => [
+            'register' => hophop_standalone_auth(),
+            'local_login' => hophop_standalone_auth(),
+            'delete_account' => hophop_standalone_auth(),
+        ],
+    ];
+
+    if (hophop_auth_mode() === 'phpbb') {
+        $payload['login_url'] = hophop_forum_login_url();
+        $payload['logout_url'] = hophop_forum_logout_url();
+        $payload['brewrecipes_share_url'] = hophop_brewrecipes_share_url();
+        $payload['brewrecipes_style_guides_url'] = hophop_brewrecipes_style_guides_url();
+        $payload['brewrecipes_styles_url'] = hophop_brewrecipes_styles_url();
+        $payload['avatar_url'] = hophop_forum_avatar_url();
+        $payload['mysql_ready'] = hophop_storage() !== 'mysql' || hophop_mysql_store_ready();
+        $usage = hophop_store_usage_counts();
+        if ($usage !== null) {
+            $payload['brewer_count'] = $usage['brewers'];
+            $payload['visitor_count'] = $usage['visitors'];
+        }
+
+        if (hophop_forum_is_bot()) {
+            $payload['blocked'] = 'robot';
+        }
+    }
+
+    return $payload;
+}
+
+function hophop_reject_if_forum_auth(): void
+{
+    if (!hophop_standalone_auth()) {
+        json_fail('Comptes gérés par le forum BrassageAmateur.', 403);
+    }
 }
 
 /** Jeu d'ingrédients et de valeurs par défaut proposé à la création d'un compte (librement modifiable ensuite). */
-function seed_data(): array {
+function seed_data(): array
+{
     $I = function (array $rows) {
-        return array_map(function ($r) { return array_merge(['id' => uid(), 'note' => ''], $r); }, $rows);
+        return array_map(function ($r) {
+            return array_merge(['id' => uid(), 'note' => ''], $r);
+        }, $rows);
     };
+
     return [
         'ver' => 1,
         'profiles' => [['id' => uid(), 'name' => 'Cuve 30 L (exemple)', 'batch' => 20, 'boil' => 60, 'evap' => 3, 'trub' => 1.5, 'mashLoss' => 1, 'absorb' => 1, 'ratio' => 3, 'infusionTemp' => 96, 'shrink' => 4, 'eff' => 72]],
@@ -57,26 +154,35 @@ function seed_data(): array {
                 ["name" => "Mousse d'Irlande", 'unit' => 'g'], ['name' => 'Gypse', 'unit' => 'g'], ['name' => 'Chlorure de calcium', 'unit' => 'g'],
                 ['name' => 'Acide lactique 80 %', 'unit' => 'mL'], ['name' => 'Coriandre (graines)', 'unit' => 'g'], ["name" => "Zeste d'orange", 'unit' => 'g'],
             ]),
-            // Vide par défaut : à peupler via « Importer bibliothèque » (fichier BeerXML ou BeerJSON, ex. guide BJCP 2015/2021/2025).
             'style' => [],
         ],
         'recipes' => [], 'brews' => [], 'stock' => new stdClass(),
     ];
 }
 
-function register(string $username, string $password): void {
+function register(string $username, string $password): void
+{
+    hophop_reject_if_forum_auth();
     $username = trim($username);
-    if (!username_valid($username)) json_fail('Identifiant invalide : 2 à 40 caractères (lettres, chiffres, . _ - @).');
-    if (strlen($password) < 6) json_fail('Mot de passe : 6 caractères minimum.');
+    if (!username_valid($username)) {
+        json_fail('Identifiant invalide : 2 à 40 caractères (lettres, chiffres, . _ - @).');
+    }
+    if (strlen($password) < 6) {
+        json_fail('Mot de passe : 6 caractères minimum.');
+    }
     $users = get_users();
-    if (isset($users[$username])) json_fail('Cet identifiant existe déjà.');
+    if (isset($users[$username])) {
+        json_fail('Cet identifiant existe déjà.');
+    }
     $users[$username] = ['hash' => password_hash($password, PASSWORD_DEFAULT), 'created' => time()];
     save_users($users);
     write_json(user_file($username), seed_data());
     $_SESSION['user'] = $username;
 }
 
-function do_login(string $username, string $password): void {
+function do_login(string $username, string $password): void
+{
+    hophop_reject_if_forum_auth();
     $users = get_users();
     $username = trim($username);
     if (!isset($users[$username]) || !password_verify($password, $users[$username]['hash'])) {
@@ -85,11 +191,65 @@ function do_login(string $username, string $password): void {
     $_SESSION['user'] = $username;
 }
 
-function do_logout(): void {
+function do_logout(): void
+{
+    if (!hophop_standalone_auth()) {
+        return;
+    }
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
         $p = session_get_cookie_params();
         setcookie(session_name(), '', time() - 42000, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
     }
     session_destroy();
+}
+
+function hophop_load_user_data(): array
+{
+    $ctx = hophop_user_context();
+    if (!$ctx) {
+        json_fail('Session expirée, reconnectez-vous.', 401);
+    }
+
+    if (hophop_storage() === 'mysql' && !hophop_mysql_store_ready()) {
+        json_fail('Stockage MySQL non configuré : exécutez docs/sql/hophop_store.sql sur la base du forum.', 503);
+    }
+
+    $data = hophop_user_store_load($ctx);
+
+    if ($data === null) {
+        $data = seed_data();
+        if (!hophop_user_store_save($ctx, $data)) {
+            json_fail('Impossible d’initialiser vos données.', 500);
+        }
+    }
+
+    return $data;
+}
+
+function hophop_save_user_data(array $data): void
+{
+    $ctx = hophop_user_context();
+    if (!$ctx) {
+        json_fail('Session expirée, reconnectez-vous.', 401);
+    }
+
+    hophop_store_debug_log(
+        'save requested uid=' . (int) $ctx['user_id']
+        . ' storage=' . hophop_storage()
+        . ' bytes=' . strlen(json_encode($data, JSON_UNESCAPED_UNICODE) ?: '')
+    );
+
+    if (hophop_storage() === 'mysql' && !hophop_mysql_store_ready()) {
+        json_fail('Stockage MySQL non configuré : exécutez docs/sql/hophop_store.sql sur la base du forum.', 503);
+    }
+
+    if (!hophop_user_store_save($ctx, $data)) {
+        $detail = hophop_last_store_error();
+        json_fail(
+            'Échec de l’enregistrement côté serveur.'
+            . ($detail !== '' ? ' ' . $detail : ''),
+            500
+        );
+    }
 }
