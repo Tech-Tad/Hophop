@@ -19,10 +19,6 @@ toutes les données sont stockées dans des fichiers JSON, sous `data/`.
 4. Ouvrez `https://votre-domaine/chemin/vers/hophop/` dans un
    navigateur : la page de connexion s'affiche. Créez un compte, c'est prêt.
 
-5. Importez dans "Ingrédients" les fichiers du répertoire `lib` pour peupler vos bibliothèques
-
-6. Pour obtenir les styles BJCP et BA, importez les fichiers JSON disponibles sur [https://github.com/beerjson/bjcp-json/tree/main/styles](https://github.com/beerjson/bjcp-json/tree/main/styles)
-
 Aucune étape de build, aucune dépendance à installer (`composer`, `npm`…) :
 les 6 fichiers du dossier suffisent.
 
@@ -57,10 +53,13 @@ location ~ ^/(data|includes)/ { deny all; return 404; }
   stockés en clair.
 - Servez l'application en HTTPS : le cookie de session est marqué
   automatiquement `Secure` dès que `$_SERVER['HTTPS']` est détecté.
-- `data/` contient des données personnelles (recettes, éventuellement des
-  identifiants) : vérifiez que le `.htaccess` fonctionne bien (tentez
-  d'ouvrir `https://votre-domaine/.../data/users.json` — vous devez obtenir
-  une erreur 403/404) ou utilisez la règle Nginx ci-dessus.
+- `data/` contient des données personnelles (recettes ; en mode standalone,
+  aussi `users.json`) : chaque niveau est protégé par `.htaccess`
+  (`data/`, `data/store/`). Test : ouvrir `…/hophop/data/users.json` ou
+  `…/hophop/data/store/un-fichier.json` → **403/404**. Sous Nginx, bloquer
+  `…/hophop/data/` explicitement (les `.htaccess` sont ignorés).
+- En mode forum + MySQL, les recettes ne devraient plus être servies depuis
+  `data/` ; ce dossier peut rester vide ou pour migration legacy uniquement.
 - Il n'y a pas de limite de tentatives de connexion intégrée. Si votre
   application est exposée publiquement, envisagez une protection
   complémentaire (fail2ban, limite au niveau du serveur web).
@@ -81,11 +80,40 @@ location ~ ^/(data|includes)/ { deny all; return 404; }
 
 Unités européennes partout (L, kg, g, °C, EBC, densité SG).
 
+## Mode autonome (défaut — GitHub, auto-hébergement)
+
+Sans `includes/config.local.php`, ou si `auth_mode` n’est pas `phpbb` :
+
+- authentification locale (création de compte / connexion HopHop) ;
+- stockage JSON sous `data/` (pas de MySQL) ;
+- pas de bouton forum, pas de partage BrewRecipes, pas de catalogue de styles BrewRecipes.
+
+`config.local.php` est dans `.gitignore` : un dépôt public peut contenir le code enrichi (UI, calculs, exports) sans la config forum.
+
+Pour forcer explicitement le mode autonome tout en gardant un fichier local :
+```php
+return ['auth_mode' => 'standalone']; // storage mysql est ignoré
+```
+
+## Intégration phpBB (BrassageAmateur)
+
+Optionnelle. Active SSO forum, MySQL et BrewRecipes uniquement si `auth_mode` = `phpbb`.
+
+1. Copier `includes/config.local.example.php` → `includes/config.local.php` (`auth_mode` = `phpbb`, `storage` = `mysql`).
+2. Exécuter `docs/sql/hophop_store.sql` sur la base phpBB (adapter le préfixe de table).
+3. Vérifier que `https://…/forum/hophop/data/users.json` renvoie **403/404** (voir sécurité ci-dessous).
+
+Au premier accès, si un ancien fichier `data/store/<pseudo>.json` existe pour le même pseudo forum, il est importé une fois en MySQL.
+
+Dans l’éditeur recette, **Partager sur BrewRecipes** envoie le BeerXML vers l’extension BrewRecipes (route `hophop/preview`, `import_source = hophop` en file d’import) puis ouvre l’aperçu d’import habituel. Nécessite BrewRecipes à jour sur le forum et une session membre.
+
+Sens inverse : BrewRecipes peut **POST** le BeerXML vers `hophop/import_preview.php` (même contrat : `application/xml`, cookies forum) → redirection HopHop → import dans l’éditeur. Indisponible en mode autonome.
+
+Dans l’éditeur, **Depuis BrewRecipes…** charge le catalogue de styles (guides AJAX) et copie le style choisi dans la bibliothèque + la recette.
+
 ## Limites connues
 
-- Un fichier JSON par compte : convient très bien à un usage personnel ou
-  amateur ; pour un très grand nombre de comptes actifs simultanément, une
-  vraie base de données serait plus adaptée (au-delà du cadre proposé ici).
+- Mode standalone : un fichier JSON par compte. Mode forum : blob JSON MySQL par `user_id`.
 - Pas de récupération de mot de passe oublié par e-mail (pas de serveur SMTP
   supposé disponible) : en cas d'oubli, un administrateur du serveur peut
   supprimer l'entrée correspondante dans `data/users.json` pour permettre
@@ -93,6 +121,6 @@ Unités européennes partout (L, kg, g, °C, EBC, densité SG).
 
 ## Licence
 
-**Hophop** Penn-Maen & claude.ai — [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr)
+**HopHop** © claude.ai & Penn-Maen + Jean-Luc (intégration phpBB+BrewRecipes) — [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr)
 (Attribution – Pas d'Utilisation Commerciale – Partage dans les Mêmes Conditions).
 Texte complet dans [`LICENSE.md`](LICENSE.md).

@@ -1,4 +1,0 @@
-delete me after install.
-
-This file is only used to keep data/store when uploaded on github
-
