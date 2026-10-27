@@ -26,6 +26,8 @@ toutes les données sont stockées dans des fichiers JSON, sous `data/`.
 Aucune étape de build, aucune dépendance à installer (`composer`, `npm`…) :
 les 6 fichiers du dossier suffisent.
 
+**Note :** le fichier 7z présent dans les releases n'inclut pas les participations tierces
+
 ## Structure
 
 ```
