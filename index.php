@@ -7,6 +7,8 @@ require_once __DIR__ . '/includes/i18n.php';
 // selon le thème actif — un simple <img src="..."> ne le permettrait pas.
 $logoPath = __DIR__ . '/includes/img/logo.svg';
 $LOGO_SVG = is_file($logoPath) ? file_get_contents($logoPath) : '';
+// Favicon : même logo, couleur fixe (un onglet de navigateur ne peut pas hériter des variables CSS du thème).
+$FAVICON_SVG = $LOGO_SVG !== '' ? str_replace('fill="currentColor"', 'fill="#2d4a2d"', $LOGO_SVG) : '';
 
 // ${t('lang_title')} : préférence enregistrée du compte (si connecté) sinon détection du navigateur, repli sur le français.
 $AVAILABLE_LANGS = hh_available_langs();
@@ -25,6 +27,9 @@ $LANG = hh_lang_strings($CUR_LANG);
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title id="pagetitle"><?php echo htmlspecialchars($LANG['app_title'] ?? 'HopHop'); ?></title>
+<?php if ($FAVICON_SVG): ?>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,<?php echo base64_encode($FAVICON_SVG); ?>">
+<?php endif; ?>
 <style>
 /* ==========================================================================
    BRASSIN — styles
@@ -114,6 +119,7 @@ textarea{min-height:5rem;resize:vertical}
 output{padding:.55rem 0;font-weight:600;color:var(--head)}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.8rem}
 .fld.span2{grid-column:span 2}
+.fld.full{grid-column:1/-1}
 .bar{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:1rem}
 .search{max-width:260px}
 
@@ -165,6 +171,49 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-weight:600;text-align:right}
 dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);padding:1.2rem;width:min(560px,94vw);max-height:90vh;overflow:auto}
 dialog::backdrop{background:rgba(20,30,20,.5)}
 .dlg-actions{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1rem}
+/* Sous-formulaire « Autres notes » (brassins, activable dans Compte) */
+details.brew-extra{margin-top:.85rem;border:1px solid var(--line);border-radius:10px;padding:.55rem .75rem;background:var(--bg);container-type:inline-size;container-name:brew-extra}
+details.brew-extra>summary{cursor:pointer;font-weight:600;color:var(--head);font-family:var(--serif);list-style-position:outside}
+details.brew-extra>summary::-webkit-details-marker{color:var(--accent)}
+details.brew-extra[open]>summary{margin-bottom:.55rem}
+details.brew-extra h3{margin:.75rem 0 .35rem;font-size:.95rem}
+details.brew-extra .fgrid{margin-top:.2rem}
+details.brew-extra .scroll{overflow-x:visible}
+details.brew-extra .scroll .brew-xn-tbl,details.brew-extra .brew-xn-tbl{width:100%;max-width:100%;table-layout:fixed;font-size:.88rem;margin:.25rem 0 .4rem}
+details.brew-extra .brew-xn-tbl th,details.brew-extra .brew-xn-tbl td{vertical-align:middle;overflow-wrap:break-word}
+details.brew-extra .brew-xn-tbl .xn-planned{width:6.5rem;color:var(--muted);white-space:nowrap}
+details.brew-extra .brew-xn-tbl .xn-actual{width:7.5rem}
+details.brew-extra .brew-xn-tbl .xn-actions{width:2.6rem;text-align:center;padding-left:.2rem;padding-right:.2rem}
+details.brew-extra .brew-xn-tbl .xn-actual input,details.brew-extra .brew-xn-tbl td.xn-actual input{width:100%;max-width:none;padding:.35rem .45rem;font-size:.88rem;box-sizing:border-box}
+details.brew-extra .brew-xn-tbl input{padding:.35rem .45rem;font-size:.88rem;max-width:none}
+details.brew-extra .brew-xn-tbl td.xn-planned input[data-xn-ep]{width:3.6rem}
+details.brew-extra .brew-xn-tbl td.xn-planned input[data-xn-eu]{width:2.4rem}
+details.brew-extra .brew-xn-rec{font-size:.72rem;color:var(--muted);font-weight:400;line-height:1.25}
+details.stat-sec{margin:.9rem 0 .3rem}
+details.stat-sec>summary{cursor:pointer;font-family:var(--serif);color:var(--head);font-weight:600;font-size:1rem;letter-spacing:.005em;list-style-position:outside}
+details.stat-sec>summary::-webkit-details-marker{color:var(--accent)}
+details.stat-sec[open]>summary{margin-bottom:.3rem}
+details.stat-sec+details.stat-sec{margin-top:.6rem}
+@container brew-extra (max-width:26rem){
+  details.brew-extra{padding:.5rem .55rem}
+  details.brew-extra .scroll .brew-xn-tbl,details.brew-extra .brew-xn-tbl{display:block;table-layout:auto;font-size:.92rem;margin:.15rem 0 .35rem}
+  details.brew-extra .brew-xn-tbl thead{display:none}
+  details.brew-extra .brew-xn-tbl tbody{display:flex;flex-direction:column;gap:.45rem}
+  details.brew-extra .brew-xn-tbl tr{display:grid;grid-template-columns:minmax(0,1fr);gap:.28rem .4rem;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:.55rem .6rem}
+  details.brew-extra .brew-xn-tbl tr:has(> .xn-actions button){grid-template-columns:minmax(0,1fr) auto}
+  details.brew-extra .brew-xn-tbl td{display:block;width:auto;max-width:none;min-width:0;padding:0;border:0;white-space:normal;overflow-wrap:break-word}
+  details.brew-extra .brew-xn-tbl td:first-child{grid-column:1;grid-row:1;font-weight:600;color:var(--text)}
+  details.brew-extra .brew-xn-tbl tr:has(> .xn-actions button)>td.xn-actions{grid-column:2;grid-row:1;align-self:center;width:auto}
+  details.brew-extra .brew-xn-tbl td.xn-actions:empty{display:none}
+  details.brew-extra .brew-xn-tbl td.xn-planned,details.brew-extra .brew-xn-tbl td.xn-actual{grid-column:1 / -1;display:flex;align-items:center;flex-wrap:wrap;gap:.35rem .45rem;width:auto;max-width:none;min-width:0;font-weight:500;color:var(--text)}
+  details.brew-extra .brew-xn-tbl td.xn-planned::before,details.brew-extra .brew-xn-tbl td.xn-actual::before{content:attr(data-label);flex:0 0 5.6rem;font-size:.72rem;font-weight:600;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+  details.brew-extra .brew-xn-tbl td.xn-actual input{flex:1 1 6rem;width:auto;min-width:0}
+  details.brew-extra .brew-xn-tbl td.xn-planned input[data-xn-ep]{flex:1 1 4.5rem;width:auto;max-width:8rem;min-width:0}
+  details.brew-extra .brew-xn-tbl td.xn-planned input[data-xn-eu]{flex:0 0 3.2rem;width:3.2rem}
+}
+.brew-extra-chip{font-size:.75rem;color:var(--muted);margin-top:.35rem}
+.brew-extra-hint{font-size:.9rem;color:var(--muted);margin:.5rem 0 .75rem;padding:.55rem .8rem;border:1px dashed var(--line);border-radius:10px;background:var(--surface)}
+.brew-extra-hint button{font:inherit;font-size:inherit;color:var(--head);background:none;border:none;padding:0;text-decoration:underline;cursor:pointer}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:1.2rem;background:var(--head);color:var(--bg);padding:.6rem 1rem;border-radius:10px;z-index:99;display:none;max-width:90vw;font-size:.92rem}
 .authscreen{position:relative;min-height:100vh;overflow:hidden}
 .auth-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--soft);opacity:.22;pointer-events:none;z-index:0}
@@ -180,7 +229,8 @@ dialog::backdrop{background:rgba(20,30,20,.5)}
   .top,.bar,.noprint,dialog,#toast{display:none!important}
   html,body{background:#fff;color:#000;font-size:11.5px}
   .wrap{padding:0;max-width:100%}
-  .card{border:1px solid #bbb;break-inside:avoid;background:#fff;padding:.5rem;margin-bottom:.4rem;border-radius:4px}
+  .cards{display:block}
+  .card{border:1px solid #bbb;break-inside:avoid;background:#fff;padding:.5rem;margin-bottom:.4rem;border-radius:4px;width:100%}
   h1,h2,h3{color:#000}
   h1{font-size:1.25rem}
   h2{font-size:.98rem;margin-bottom:.25rem}
@@ -196,6 +246,7 @@ dialog::backdrop{background:rgba(20,30,20,.5)}
   .sheet ol{padding-left:1.1rem}
   .sheet li{margin:.2rem 0}
   .chip{padding:.02rem .45rem;font-size:.7rem}
+  .print-hide{display:none!important}
 }
 
 /* ==========================================================================
@@ -392,6 +443,7 @@ function normalizeData(d) {
     if (typeof r.biabSqueeze !== 'boolean') r.biabSqueeze = prof.biabSqueeze ?? false;
   });
   d.brews = Array.isArray(d.brews) ? d.brews : [];
+  d.brews.forEach(normalizeBrewExtraNotes);
   d.stock = (d.stock && typeof d.stock === 'object') ? d.stock : {};
   d.prefs = (d.prefs && typeof d.prefs === 'object') ? d.prefs : {};
   if (!THEMES().some(([k]) => k === d.prefs.theme)) d.prefs.theme = 'vert';
@@ -401,6 +453,7 @@ function normalizeData(d) {
   if (d.prefs.avatarType !== 'image') d.prefs.avatarType = 'emoji';
   if (!d.prefs.avatarEmoji) d.prefs.avatarEmoji = '🍺';
   if (typeof d.prefs.avatarImage !== 'string') d.prefs.avatarImage = '';
+  if (d.prefs.brewExtraNotes !== true) d.prefs.brewExtraNotes = false;
   if (!AVAILABLE_LANGS.includes(d.prefs.lang)) d.prefs.lang = AVAILABLE_LANGS.includes(CUR_LANG) ? CUR_LANG : 'fr';
   return d;
 }
@@ -452,9 +505,9 @@ async function logout() {
 
 /* ---------- 3. LIBELLÉS & GABARITS ---------- */
 // Version affichée de l'application (écran de connexion + pied de page), à incrémenter à chaque publication.
-const APP_VERSION = '1.2';
+const APP_VERSION = '1.3';
 // Mention de licence : affichée sur l'écran de connexion et en pied de page sur toutes les vues de l'application.
-const LICENSE_HTML = `HopHop v${APP_VERSION} © claude.ai & Penn-Maen — <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener" style="color:inherit">CC BY-NC-SA 4.0</a>`;
+const LICENSE_HTML = `HopHop v${APP_VERSION} © claude.ai, Penn-Maen, Jean-Luc — <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr" target="_blank" rel="noopener" style="color:inherit">CC BY-NC-SA 4.0</a>`;
 const FTYPE = () => ({grain: t('ftype_grain'), sugar: t('ftype_sugar'), extract: t('ftype_extract')});
 const USE_H = () => ({boil: t('useh_boil'), fwh: t('useh_fwh'), whirl: t('useh_whirl'), hopstand: t('useh_hopstand'), dry: t('useh_dry')});
 const USE_M = () => ({mash: t('usem_mash'), boil: t('usem_boil'), ferm: t('usem_ferm'), bottle: t('usem_bottle')});
@@ -749,18 +802,18 @@ function statsHTML(c, r) {
         <span class="chip${inRange(c.ebc, st.colorMin, st.colorMax) ? '' : ' bad'}">EBC ${f(st.colorMin, 0)}–${f(st.colorMax, 0)}</span>
         <span class="chip${inRange(c.abv, st.abvMin, st.abvMax) ? '' : ' bad'}">${t('kpi_alcohol')} ${f(st.abvMin, 1)}–${f(st.abvMax, 1)} %</span>
       </div>` : ''}
-    <h3>${t('stats_water')}</h3><dl class="kv"><dt>${t('stats_mash')}</dt><dd>${t('vol_at_temp', {vol: f(c.mashWater, 1), temp: f(c.strike, 0)})}</dd><dt>${t('stats_sparge')}</dt><dd>${c.mashMethod === 'biab' ? t('stats_none_biab') : f(c.sparge, 1) + ' L'}</dd><dt>${t('stats_totalwater')}</dt><dd>${f(c.totalWater, 1)} L</dd>
-      <dt>${t('stats_preboil')}</dt><dd>${f(c.preboil, 1)} L · ${gUnit(c.pbSG)}</dd><dt>${t('stats_evap')}</dt><dd>${f(c.evapL, 1)} L</dd></dl>
-    ${c.mashMethod === 'biab' ? `<div class="sub" style="margin-top:-.2rem;margin-bottom:.5rem">${t('stats_biab_note')}${c.biabSqueeze ? t('stats_biab_squeeze_note') : ''}</div>` : ''}
-    ${c.mashSteps.length ? `<h3>${t('stats_mash_vol')}</h3><dl class="kv">${c.mashSteps.map((m, i) => `<dt>${esc(m.name)} (${f(m.temp, 0)} °C)</dt><dd>${f(m.volume, 1)} L${i > 0 && m.method === 'infusion' && m.infusion > 0 ? ` (+${f(m.infusion, 1)} L)` : ''}${i > 0 && m.method === 'decoction' && m.decoctionVol > 0 ? t('stats_decoct_inline', {vol: f(m.decoctionVol, 1)}) : ''}</dd>`).join('')}</dl>
-      <div class="sub" style="margin-top:.2rem">${t('stats_mash_vol_note', {temp: f(c.infusionTemp, 0)})}</div>` : ''}
-    ${c.P.mashTunMax > 0 && c.maxMashVol > c.P.mashTunMax ? `<div class="warn">${t('stats_mashtun_overflow', {vol: f(c.maxMashVol, 1), max: f(c.P.mashTunMax, 1)})}</div>` : ''}
-    <h3>${t('stats_grains')}</h3><dl class="kv"><dt>${t('stats_total_ferm')}</dt><dd>${f(c.kgTot, 2)} kg</dd><dt>${t('stats_ratio')}</dt><dd>${f(c.ratio, 1)} L/kg</dd><dt>${t('stats_eff')}</dt><dd>${f(c.effPct, 0)} %</dd><dt>${t('stats_attenuation')}</dt><dd>${f(c.att, 0)} %</dd></dl>
-    <h3>${t('stats_conditioning')}</h3><dl class="kv"><dt>${t('stats_sucrose')}</dt><dd>${f(c.sugarL, 1)} g/L</dd><dt>${t('stats_total')}</dt><dd>${f(c.sugarTot, 0)} g</dd></dl>
-    <h3>${t('stats_cost')}</h3><dl class="kv"><dt>${t('sec_ferm')}</dt><dd>${f(c.costFerm, 2)} €</dd><dt>${t('sec_hops')}</dt><dd>${f(c.costHop, 2)} €</dd><dt>${t('sheet_yeast')}</dt><dd>${f(c.costYeast, 2)} €</dd><dt>${t('sec_misc')}</dt><dd>${f(c.costMisc, 2)} €</dd>
-      <dt>${t('stats_total')}</dt><dd>${f(c.costTotal, 2)} €</dd><dt>${t('stats_perliter')}</dt><dd>${f(c.costPerL, 2)} €/L</dd></dl>
-    ${c.costTotal === 0 && (r.ferm.length || r.hops.length) ? `<div class="sub" style="margin-top:.3rem">${t('stats_cost_note')}</div>` : ''}
     ${c.hasYeast ? '' : `<div class="warn">${t('stats_no_yeast')}</div>`}
+    ${c.P.mashTunMax > 0 && c.maxMashVol > c.P.mashTunMax ? `<div class="warn">${t('stats_mashtun_overflow', {vol: f(c.maxMashVol, 1), max: f(c.P.mashTunMax, 1)})}</div>` : ''}
+    <details class="stat-sec" open><summary>${t('stats_water')}</summary><dl class="kv"><dt>${t('stats_mash')}</dt><dd>${t('vol_at_temp', {vol: f(c.mashWater, 1), temp: f(c.strike, 0)})}</dd><dt>${t('stats_sparge')}</dt><dd>${c.mashMethod === 'biab' ? t('stats_none_biab') : f(c.sparge, 1) + ' L'}</dd><dt>${t('stats_totalwater')}</dt><dd>${f(c.totalWater, 1)} L</dd>
+      <dt>${t('stats_preboil')}</dt><dd>${f(c.preboil, 1)} L · ${gUnit(c.pbSG)}</dd><dt>${t('stats_evap')}</dt><dd>${f(c.evapL, 1)} L</dd></dl>
+    ${c.mashMethod === 'biab' ? `<div class="sub" style="margin-top:-.2rem;margin-bottom:.5rem">${t('stats_biab_note')}${c.biabSqueeze ? t('stats_biab_squeeze_note') : ''}</div>` : ''}</details>
+    ${c.mashSteps.length ? `<details class="stat-sec" open><summary>${t('stats_mash_vol')}</summary><dl class="kv">${c.mashSteps.map((m, i) => `<dt>${esc(m.name)} (${f(m.temp, 0)} °C)</dt><dd>${f(m.volume, 1)} L${i > 0 && m.method === 'infusion' && m.infusion > 0 ? ` (+${f(m.infusion, 1)} L)` : ''}${i > 0 && m.method === 'decoction' && m.decoctionVol > 0 ? t('stats_decoct_inline', {vol: f(m.decoctionVol, 1)}) : ''}</dd>`).join('')}</dl>
+      <div class="sub" style="margin-top:.2rem">${t('stats_mash_vol_note', {temp: f(c.infusionTemp, 0)})}</div></details>` : ''}
+    <details class="stat-sec" open><summary>${t('stats_grains')}</summary><dl class="kv"><dt>${t('stats_total_ferm')}</dt><dd>${f(c.kgTot, 2)} kg</dd><dt>${t('stats_ratio')}</dt><dd>${f(c.ratio, 1)} L/kg</dd><dt>${t('stats_eff')}</dt><dd>${f(c.effPct, 0)} %</dd><dt>${t('stats_attenuation')}</dt><dd>${f(c.att, 0)} %</dd></dl></details>
+    <details class="stat-sec" open><summary>${t('stats_conditioning')}</summary><dl class="kv"><dt>${t('stats_sucrose')}</dt><dd>${f(c.sugarL, 1)} g/L</dd><dt>${t('stats_total')}</dt><dd>${f(c.sugarTot, 0)} g</dd></dl></details>
+    <details class="stat-sec" open><summary>${t('stats_cost')}</summary><dl class="kv"><dt>${t('sec_ferm')}</dt><dd>${f(c.costFerm, 2)} €</dd><dt>${t('sec_hops')}</dt><dd>${f(c.costHop, 2)} €</dd><dt>${t('sheet_yeast')}</dt><dd>${f(c.costYeast, 2)} €</dd><dt>${t('sec_misc')}</dt><dd>${f(c.costMisc, 2)} €</dd>
+      <dt>${t('stats_total')}</dt><dd>${f(c.costTotal, 2)} €</dd><dt>${t('stats_perliter')}</dt><dd>${f(c.costPerL, 2)} €/L</dd></dl>
+    ${c.costTotal === 0 && (r.ferm.length || r.hops.length) ? `<div class="sub" style="margin-top:.3rem">${t('stats_cost_note')}</div>` : ''}</details>
     ${c.kgTot === 0 ? `<div class="warn">${t('stats_no_ferm')}</div>` : ''}</div>`;
 }
 
@@ -859,6 +912,240 @@ function viewSheet() {
 }
 
 /* --- Brassins (historique) --- */
+// « Autres notes » : sous-formulaire optionnel (activable dans Compte) relevant, le jour de brassage,
+// les quantités réellement utilisées, températures, pH, densités et volumes à chaque étape, en plus des
+// notes de brassage/dégustation déjà existantes. Porté depuis le fork communautaire Mirrabeau/Hophop.
+function emptyBrewExtraNotes() {
+  return {
+    qtyActual: {},
+    qtyExtra: [],
+    temp: {},
+    ph: {mashBefore: '', mashDuring: '', mashEnd: '', spargeWater: '', preBoil: '', postBoil: ''},
+    sg: {preSparge: '', preBoil: '', postBoil: ''},
+    vol: {},
+    free: '',
+  };
+}
+function normalizeBrewExtraNotes(b) {
+  if (!b || typeof b !== 'object') return;
+  const base = emptyBrewExtraNotes();
+  const src = (b.extraNotes && typeof b.extraNotes === 'object') ? b.extraNotes : {};
+  const mapVals = (obj) => {
+    const out = {};
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      Object.keys(obj).forEach(k => { if (obj[k] != null && obj[k] !== '') out[k] = obj[k]; });
+    }
+    return out;
+  };
+  const ph = {...base.ph};
+  const phSrc = (src.ph && typeof src.ph === 'object') ? src.ph : {};
+  Object.keys(ph).forEach(k => { if (phSrc[k] != null && phSrc[k] !== '') ph[k] = phSrc[k]; });
+  const sg = {...base.sg};
+  const sgSrc = (src.sg && typeof src.sg === 'object') ? src.sg : {};
+  Object.keys(sg).forEach(k => { if (sgSrc[k] != null && sgSrc[k] !== '') sg[k] = sgSrc[k]; });
+  const free = src.free != null ? String(src.free) : '';
+  const temp = mapVals(src.temp);
+  const vol = mapVals(src.vol);
+  b.extraNotes = {
+    qtyActual: mapVals(src.qtyActual),
+    qtyExtra: Array.isArray(src.qtyExtra) ? src.qtyExtra.map(x => ({
+      name: x?.name != null ? String(x.name) : '',
+      unit: x?.unit != null ? String(x.unit) : '',
+      planned: x?.planned != null && x.planned !== '' ? x.planned : '',
+      actual: x?.actual != null && x.actual !== '' ? x.actual : '',
+    })) : [],
+    temp, ph, sg, vol, free,
+  };
+}
+function brewExtraHasVal(v) { return v != null && String(v).trim() !== ''; }
+function brewExtraNotesFilled(b) {
+  if (!b?.extraNotes) return false;
+  const e = b.extraNotes;
+  if (Object.values(e.qtyActual || {}).some(brewExtraHasVal)) return true;
+  if ((e.qtyExtra || []).some(x => brewExtraHasVal(x.name) || brewExtraHasVal(x.actual) || brewExtraHasVal(x.planned))) return true;
+  if ([e.temp, e.ph, e.sg, e.vol].some(g => g && Object.values(g).some(brewExtraHasVal))) return true;
+  return brewExtraHasVal(e.free);
+}
+function brewSnapCalc(b) {
+  const r = b?.snap && typeof b.snap === 'object' ? b.snap : null;
+  if (!r) return {r: null, c: null};
+  try { return {r, c: calc(r)}; } catch { return {r, c: null}; }
+}
+function brewExtraQtyPlan(b) {
+  const {r} = brewSnapCalc(b);
+  if (!r) return [];
+  const rows = [];
+  (r.ferm || []).forEach((x, i) => {
+    const g = lib('ferm', x.ref);
+    rows.push({k: 'ferm.' + i, label: g?.name || t('imp_ferm_name'), planned: N(x.kg), unit: 'kg', plannedTxt: f(N(x.kg), 3) + ' kg'});
+  });
+  (r.hops || []).forEach((x, i) => {
+    const h = lib('hop', x.ref);
+    const use = USE_H()[x.use] ? ' · ' + USE_H()[x.use] : '';
+    rows.push({k: 'hops.' + i, label: (h?.name || t('imp_hop_name')) + use, planned: N(x.g), unit: 'g', plannedTxt: f(N(x.g), 1) + ' g'});
+  });
+  (r.yeast || []).forEach((x, i) => {
+    const y = lib('yeast', x.ref);
+    rows.push({k: 'yeast.' + i, label: y?.name || t('imp_yeast_name'), planned: N(x.qty), unit: '×', plannedTxt: f(N(x.qty), 1) + ' ×'});
+  });
+  (r.misc || []).forEach((x, i) => {
+    const m = lib('misc', x.ref);
+    const unit = m?.unit || '';
+    rows.push({k: 'misc.' + i, label: m?.name || t('imp_misc_name'), planned: N(x.qty), unit, plannedTxt: f(N(x.qty), 2) + (unit ? ' ' + unit : '')});
+  });
+  return rows;
+}
+function brewExtraTempPlan(b) {
+  const {r, c} = brewSnapCalc(b);
+  const rows = [];
+  if (c && c.kgMash > 0) rows.push({k: 'strike', label: t('xn_strike_label'), planned: rnd(c.strike, 0), plannedTxt: f(c.strike, 0) + ' °C'});
+  (r?.mash || []).forEach((s, i) => rows.push({k: 'mash.' + i, label: s.name || t('xn_palier_n', {n: i + 1}), planned: N(s.temp), plannedTxt: f(N(s.temp), 0) + ' °C'}));
+  if (c && c.sparge > 0) rows.push({k: 'sparge', label: t('xn_sparge_label'), planned: 78, plannedTxt: '78 °C'});
+  rows.push({k: 'boil', label: t('xn_boil_label'), planned: 100, plannedTxt: '100 °C'});
+  rows.push({k: 'postBoil', label: t('xn_postboil_label'), planned: '', plannedTxt: '—'});
+  const ft = r?.ferment?.[0] != null && r.ferment[0].temp !== '' && r.ferment[0].temp != null ? N(r.ferment[0].temp) : '';
+  rows.push({k: 'chilled', label: t('xn_chilled_label'), planned: ft, plannedTxt: ft === '' ? '—' : f(ft, 0) + ' °C'});
+  return rows;
+}
+function brewExtraVolPlan(b) {
+  const {c} = brewSnapCalc(b);
+  if (!c) {
+    return [
+      {k: 'preSparge', label: t('xn_presparge_label'), plannedTxt: '—'},
+      {k: 'spargeWater', label: t('xn_spargewater_label'), plannedTxt: '—'},
+      {k: 'preBoil', label: t('xn_preboil_label'), plannedTxt: '—'},
+      {k: 'postBoil', label: t('xn_postboil_label'), plannedTxt: '—'},
+      {k: 'fermenter', label: t('xn_fermenter_label'), plannedTxt: '—'},
+      {k: 'packaging', label: t('xn_packaging_label'), plannedTxt: '—'},
+    ];
+  }
+  const mashVol = c.mashSteps.length ? c.mashSteps[c.mashSteps.length - 1].volume : c.mashWater;
+  const postBoil = (c.V + c.P.trub) / (1 - c.P.shrink / 100);
+  return [
+    {k: 'preSparge', label: t('xn_presparge_label'), planned: rnd(mashVol, 1), plannedTxt: f(mashVol, 1) + ' L'},
+    {k: 'spargeWater', label: t('xn_spargewater_label'), planned: rnd(c.sparge, 1), plannedTxt: f(c.sparge, 1) + ' L'},
+    {k: 'preBoil', label: t('xn_preboil_label'), planned: rnd(c.preboil, 1), plannedTxt: f(c.preboil, 1) + ' L'},
+    {k: 'postBoil', label: t('xn_postboil_label'), planned: rnd(postBoil, 1), plannedTxt: f(postBoil, 1) + ' L'},
+    {k: 'fermenter', label: t('xn_fermenter_label'), planned: rnd(c.V, 1), plannedTxt: f(c.V, 1) + ' L'},
+    {k: 'packaging', label: t('xn_packaging_label'), planned: rnd(c.V, 1), plannedTxt: f(c.V, 1) + ' L'},
+  ];
+}
+function brewExtraSgPlan(b) {
+  const {c} = brewSnapCalc(b);
+  return [
+    {k: 'preSparge', label: t('xn_presparge_label'), plannedTxt: '—'},
+    {k: 'preBoil', label: t('xn_preboil_label'), plannedTxt: c ? gPrimaryText(c.pbSG) : '—'},
+    {k: 'postBoil', label: t('xn_postboil_label'), plannedTxt: c ? gPrimaryText(c.og) : '—'},
+  ];
+}
+const BREW_PH_ROWS = () => [
+  {k: 'mashBefore', label: t('xn_ph_mashbefore'), rec: t('xn_rec_mashbefore')},
+  {k: 'mashDuring', label: t('xn_ph_mashduring'), rec: t('xn_rec_mashduring')},
+  {k: 'mashEnd', label: t('xn_ph_mashend'), rec: t('xn_rec_mashend')},
+  {k: 'spargeWater', label: t('xn_spargewater_label'), rec: t('xn_rec_spargewater')},
+  {k: 'preBoil', label: t('xn_preboil_label'), rec: t('xn_rec_preboil')},
+  {k: 'postBoil', label: t('xn_postboil_label'), rec: t('xn_rec_postboil')},
+];
+function brewXnNum(attrs, val) {
+  return `<input ${attrs} data-t="n" inputmode="decimal" value="${esc(val ?? '')}">`;
+}
+function brewExtraQtyExtraRow(x = {}) {
+  return `<tr data-xn-extra>
+    <td><input data-xn-en placeholder="${t('xn_ing_placeholder')}" aria-label="${t('xn_ing_added_aria')}" value="${esc(x.name || '')}"></td>
+    <td class="xn-planned" data-label="${t('xn_col_qty_planned')}"><input data-xn-ep data-t="n" inputmode="decimal" aria-label="${t('xn_col_qty_planned')}" value="${esc(x.planned ?? '')}"> <input data-xn-eu placeholder="${t('xn_unit_placeholder')}" aria-label="${t('f_unit')}" value="${esc(x.unit || '')}"></td>
+    <td class="xn-actual" data-label="${t('xn_col_qty_actual')}"><input data-xn-ea data-t="n" inputmode="decimal" aria-label="${t('xn_col_qty_actual')}" value="${esc(x.actual ?? '')}"></td>
+    <td class="xn-actions noprint"><button type="button" class="ico" data-act="xnRmQty" aria-label="${t('ing_remove_aria')}">✕</button></td>
+  </tr>`;
+}
+/** Sous-formulaire dépliable « Autres notes » (si activé dans Compte). */
+function brewExtraNotesHTML(b) {
+  normalizeBrewExtraNotes(b);
+  const e = b.extraNotes, open = brewExtraNotesFilled(b) ? ' open' : '';
+  const qtyRows = brewExtraQtyPlan(b);
+  const qtyExtras = [...(e.qtyExtra || []), {}];
+  const qtyBody = qtyRows.map(row => `<tr>
+      <td>${esc(row.label)}</td>
+      <td class="xn-planned" data-label="${t('xn_col_qty_planned')}">${esc(row.plannedTxt)}</td>
+      <td class="xn-actual" data-label="${t('xn_col_qty_actual')}">${brewXnNum(`data-xn-qty="${esc(row.k)}" aria-label="${t('xn_col_qty_actual')} ${esc(row.label)}"`, e.qtyActual[row.k])}</td>
+      <td class="xn-actions"></td>
+    </tr>`).join('') + qtyExtras.map(brewExtraQtyExtraRow).join('');
+  const tempBody = brewExtraTempPlan(b).map(row => `<tr>
+      <td>${esc(row.label)}</td>
+      <td class="xn-planned" data-label="${t('xn_col_temp_planned')}">${esc(row.plannedTxt)}</td>
+      <td class="xn-actual" data-label="${t('xn_col_temp_actual')}">${brewXnNum(`data-xn-temp="${esc(row.k)}" aria-label="${t('xn_col_temp_actual')} ${esc(row.label)}"`, e.temp[row.k])}</td>
+    </tr>`).join('');
+  const volBody = brewExtraVolPlan(b).map(row => `<tr>
+      <td>${esc(row.label)}</td>
+      <td class="xn-planned" data-label="${t('xn_col_vol_planned')}">${esc(row.plannedTxt)}</td>
+      <td class="xn-actual" data-label="${t('xn_col_vol_actual')}">${brewXnNum(`data-xn-vol="${esc(row.k)}" aria-label="${t('xn_col_vol_actual')} ${esc(row.label)}"`, e.vol[row.k])}</td>
+    </tr>`).join('');
+  const sgBody = brewExtraSgPlan(b).map(row => `<tr>
+      <td>${esc(row.label)}</td>
+      <td class="xn-planned" data-label="${t('xn_col_sg_planned')}">${esc(row.plannedTxt)}</td>
+      <td class="xn-actual" data-label="${t('xn_col_sg_actual')}">${brewXnNum(`data-f="xn.sg.${esc(row.k)}" aria-label="${t('xn_col_sg_actual')} ${esc(row.label)}"`, e.sg[row.k])}</td>
+    </tr>`).join('');
+  const phBody = BREW_PH_ROWS().map(row => `<tr>
+      <td>${esc(row.label)}<div class="brew-xn-rec">${esc(row.rec)}</div></td>
+      <td class="xn-actual" data-label="${t('xn_col_ph_actual')}">${brewXnNum(`data-f="xn.ph.${esc(row.k)}" aria-label="${t('xn_col_ph_actual')} ${esc(row.label)}"`, e.ph[row.k])}</td>
+    </tr>`).join('');
+  return `<details class="brew-extra"${open}>
+    <summary>${t('xn_section_title')}</summary>
+    <p class="sub" style="margin:.2rem 0 .5rem">${t('xn_intro')}</p>
+    <h3>${t('xn_qty_title')}</h3>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>${t('col_ingredient')}</th><th class="xn-planned">${t('xn_col_qty_planned')}</th><th class="xn-actual">${t('xn_col_qty_actual')}</th><th class="xn-actions"></th></tr></thead>
+      <tbody id="xn-qty-body">${qtyBody}</tbody></table></div>
+    <div class="dlg-actions noprint" style="justify-content:flex-start;margin:.2rem 0 .5rem"><button type="button" class="btn ghost sm" data-act="xnAddQty">${t('xn_add_ing')}</button></div>
+    <h3>${t('xn_temp_title')}</h3>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>${t('xn_col_step')}</th><th class="xn-planned">${t('xn_col_temp_planned')}</th><th class="xn-actual">${t('xn_col_temp_actual')}</th></tr></thead><tbody>${tempBody}</tbody></table></div>
+    <h3>${t('xn_ph_title')}</h3>
+    <p class="sub" style="margin:.1rem 0 .35rem">${t('xn_ph_note')}</p>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>${t('xn_col_measure')}</th><th class="xn-actual">${t('xn_col_ph_actual')}</th></tr></thead><tbody>${phBody}</tbody></table></div>
+    <h3>${t('xn_sg_title')}</h3>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>${t('xn_col_measure')}</th><th class="xn-planned">${t('xn_col_sg_planned')}</th><th class="xn-actual">${t('xn_col_sg_actual')}</th></tr></thead><tbody>${sgBody}</tbody></table></div>
+    <h3>${t('xn_vol_title')}</h3>
+    <div class="scroll"><table class="tbl brew-xn-tbl"><thead><tr><th>${t('xn_col_measure')}</th><th class="xn-planned">${t('xn_col_vol_planned')}</th><th class="xn-actual">${t('xn_col_vol_actual')}</th></tr></thead><tbody>${volBody}</tbody></table></div>
+    <h3>${t('xn_free_title')}</h3>
+    <div class="fgrid"><label class="fld full"><span>${t('xn_free_label')}</span><textarea id="xn-free" data-f="xn.free">${esc(e.free)}</textarea></label></div>
+  </details>`;
+}
+function readBrewExtraFromDlg() {
+  const e = emptyBrewExtraNotes();
+  document.querySelectorAll('#dlg [data-xn-qty]').forEach(el => {
+    e.qtyActual[el.dataset.xnQty] = el.value === '' ? '' : N(el.value);
+  });
+  document.querySelectorAll('#dlg tr[data-xn-extra]').forEach(tr => {
+    const name = tr.querySelector('[data-xn-en]')?.value || '';
+    const unit = tr.querySelector('[data-xn-eu]')?.value || '';
+    const ep = tr.querySelector('[data-xn-ep]');
+    const ea = tr.querySelector('[data-xn-ea]');
+    const planned = ep && ep.value !== '' ? N(ep.value) : '';
+    const actual = ea && ea.value !== '' ? N(ea.value) : '';
+    if (!name.trim() && planned === '' && actual === '' && !unit.trim()) return;
+    e.qtyExtra.push({name, unit, planned, actual});
+  });
+  document.querySelectorAll('#dlg [data-xn-temp]').forEach(el => {
+    e.temp[el.dataset.xnTemp] = el.value === '' ? '' : N(el.value);
+  });
+  document.querySelectorAll('#dlg [data-xn-vol]').forEach(el => {
+    e.vol[el.dataset.xnVol] = el.value === '' ? '' : N(el.value);
+  });
+  document.querySelectorAll('#dlg [data-f^="xn.ph."], #dlg [data-f^="xn.sg."], #dlg [data-f="xn.free"]').forEach(el => {
+    const path = el.dataset.f.slice(3).split('.');
+    let node = e;
+    for (let i = 0; i < path.length - 1; i++) node = node[path[i]];
+    const last = path[path.length - 1];
+    node[last] = el.dataset.t === 'n' ? (el.value === '' ? '' : N(el.value)) : el.value;
+  });
+  return e;
+}
+/** Sous le formulaire d'édition d'un brassin : Autres notes (si activé) ou rappel vers Compte. */
+function brewFormExtraNotesHTML(b) {
+  if (D.prefs.brewExtraNotes === true) {
+    normalizeBrewExtraNotes(b);
+    return brewExtraNotesHTML(b);
+  }
+  return `<p class="brew-extra-hint">${t('xn_hint_disabled', {btn: `<button type="button" data-act="go" data-v="account">${t('nav_account')}</button>`})}</p>`;
+}
 function brewCalc(b) {
   const og = b.ogM, fg = b.fgM, has = og > 1 && fg > 0.99;
   const abv = has ? (og - fg) * 131.25 : null, att = has && og > 1 ? (og - fg) / (og - 1) * 100 : null;
@@ -868,14 +1155,16 @@ function brewCalc(b) {
 }
 function viewBrews() {
   const l = [...D.brews].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  return `<div class="bar"><h1>${t('brews_title')}</h1><div class="grow"></div><button class="btn" data-act="newBrew">${t('brews_new')}</button></div>
-  ${l.length ? `<div class="cards">${l.map(b => { const k = brewCalc(b); return `<div class="card" style="margin:0"><div style="display:flex;justify-content:space-between;gap:.5rem"><h2 style="margin:0">${esc(b.recipeName)}</h2><span class="chip">${STATUS()[b.status]}</span></div>
+  return `<div class="bar"><h1>${t('brews_title')}</h1><div class="grow"></div><button class="btn ghost sm noprint" data-act="print">${t('sheet_print')}</button><button class="btn" data-act="newBrew">${t('brews_new')}</button></div>
+  ${l.length ? `<div class="cards">${l.map(b => { const k = brewCalc(b); return `<div class="card" data-brewid="${b.id}" style="margin:0"><div style="display:flex;justify-content:space-between;gap:.5rem"><h2 style="margin:0">${esc(b.recipeName)}</h2><span class="chip">${STATUS()[b.status]}</span></div>
     <div class="sub">${fdate(b.date)} · ${f(b.vol, 1)} L</div>
     <dl class="kv" style="margin-top:.6rem"><dt>${t('brews_og')}</dt><dd>${b.ogM > 1 ? gUnit(b.ogM) : '–'} <span class="sub">${t('brews_target', {v: gPrimaryText(b.stats.og)})}</span></dd><dt>${t('brews_fg')}</dt><dd>${b.fgM > 0.99 ? gUnit(b.fgM) : '–'} <span class="sub">${t('brews_target', {v: gPrimaryText(b.stats.fg)})}</span></dd>
       <dt>${t('brews_refracto')}</dt><dd>≈ ${f(rawBrixAtFG(b.ogM > 1 ? b.ogM : b.stats.og, b.fgM > 0.99 ? b.fgM : b.stats.fg), 1)} °Bx</dd>
       <dt>${t('brews_real_alcohol')}</dt><dd>${k.abv === null ? '–' : f(k.abv, 1) + ' %'}</dd><dt>${t('stats_attenuation')}</dt><dd>${k.att === null ? '–' : f(k.att, 0) + ' %'}</dd><dt>${t('brews_real_eff')}</dt><dd>${k.eff === null ? '–' : f(k.eff, 0) + ' %'}</dd></dl>
-    ${b.notes ? `<p class="sub" style="white-space:pre-wrap">${esc(b.notes)}</p>` : ''}
-    <div class="dlg-actions" style="justify-content:flex-start"><button class="btn ghost sm" data-act="editBrew" data-id="${b.id}">${t('ing_edit')}</button><button class="btn danger sm" data-act="delBrew" data-id="${b.id}">${t('btn_delete')}</button></div></div>`; }).join('')}</div>`
+    ${b.notes ? `<div style="margin-top:.7rem"><h3 style="margin:0 0 .2rem">${t('brew_edit_notes')}</h3><p style="white-space:pre-wrap;margin:0;font-size:1rem">${esc(b.notes)}</p></div>` : ''}
+    ${b.tasting ? `<div style="margin-top:.7rem"><h3 style="margin:0 0 .2rem">${t('brew_edit_tasting')}</h3><p style="white-space:pre-wrap;margin:0;font-size:1rem">${esc(b.tasting)}</p></div>` : ''}
+    ${D.prefs.brewExtraNotes && brewExtraNotesFilled(b) ? `<p class="brew-extra-chip">${t('xn_chip_filled')}</p>` : ''}
+    <div class="dlg-actions noprint" style="justify-content:flex-start"><button class="btn ghost sm" data-act="editBrew" data-id="${b.id}">${t('ing_edit')}</button><button class="btn ghost sm" data-act="printBrew" data-id="${b.id}">${t('sheet_print')}</button>${D.prefs.brewExtraNotes === true ? `<button class="btn ghost sm" data-act="printBrewExtra" data-id="${b.id}">${t('xn_print_plus')}</button>` : ''}<button class="btn danger sm" data-act="delBrew" data-id="${b.id}">${t('btn_delete')}</button></div></div>`; }).join('')}</div>`
     : `<div class="empty">${t('brews_empty')}</div>`}`;
 }
 
@@ -978,6 +1267,13 @@ function viewAccount() {
       <button data-act="setRefract" data-v="linear" aria-pressed="${D.prefs.refractFormula !== 'cubic'}">${t('refract_linear')}</button>
       <button data-act="setRefract" data-v="cubic" aria-pressed="${D.prefs.refractFormula === 'cubic'}">${t('refract_cubic')}</button></div>
     <p class="sub" style="margin-bottom:0">${t('refract_note')}</p></div>
+  <div class="card"><h2>${t('xn_toggle_title')}</h2>
+    <p class="sub" style="margin-top:0">${t('xn_toggle_desc')}</p>
+    <div class="seg">
+      <button data-act="setBrewExtra" data-v="1" aria-pressed="${D.prefs.brewExtraNotes === true}">${t('xn_enabled')}</button>
+      <button data-act="setBrewExtra" data-v="0" aria-pressed="${D.prefs.brewExtraNotes !== true}">${t('xn_disabled')}</button>
+    </div>
+    <p class="sub" style="margin-bottom:0">${t('xn_toggle_note')}</p></div>
   <div class="card"><h2>${t('backup_title')}</h2><p class="sub" style="margin-top:0">${t('backup_note')}</p>
     <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0"><button class="btn ghost sm" data-act="backup">${t('backup_export')}</button><button class="btn ghost sm" data-act="restore">${t('backup_import')}</button><input type="file" id="restoreFile" accept=".json,application/json" style="display:none"></div></div>
   <div class="card"><h2>${t('danger_zone')}</h2><button class="btn danger sm" data-act="delAccount">${t('delete_account_btn')}</button></div>`;
@@ -1007,7 +1303,7 @@ function openForm(title, fields, vals, onSave, extra = '') {
   const inner = fields.map(fd => {
     const v = vals[fd.k] ?? '', id = 'f-' + fd.k;
     if (fd.t === 'select') return fld(fd.l, `<select id="${id}" data-f="${fd.k}">${opts(fd.o, v)}</select>`);
-    if (fd.t === 'textarea') return fld(fd.l, `<textarea id="${id}" data-f="${fd.k}">${esc(v)}</textarea>`, 'full');
+    if (fd.t === 'textarea') return fld(fd.l, `<textarea id="${id}" data-f="${fd.k}"${fd.big ? ' rows="4"' : ''}>${esc(v)}</textarea>`, 'full');
     if (fd.t === 'check') return `<label class="fld full" style="flex-direction:row;align-items:center;gap:.5rem"><input type="checkbox" style="width:auto" id="${id}" data-f="${fd.k}" ${v ? 'checked' : ''}><span style="text-transform:none;font-size:.95rem;color:var(--text)">${fd.l}</span></label>`;
     if (fd.t === 'date') return fld(fd.l, `<input type="date" id="${id}" data-f="${fd.k}" value="${esc(v)}">`);
     return fld(fd.l, `<input id="${id}" data-f="${fd.k}" ${fd.t === 'number' ? 'data-t="n" inputmode="decimal"' : ''} value="${esc(v)}">`);
@@ -1034,6 +1330,7 @@ const scaleRecipe = (r, nv) => {
 function createBrew(r, date) {
   const c = calc(r);
   const b = {id: uid(), recipeId: r.id, recipeName: r.name, date, status: 'brewed', ogM: 0, fgM: 0, vol: N(r.batch), notes: '', tasting: '',
+    extraNotes: emptyBrewExtraNotes(),
     stats: {og: c.og, fg: c.fg, abv: c.abv, ibu: c.ibu, ebc: c.ebc, potGrain: c.potGrain, potOther: c.potOther}, snap: clone(r)};
   D.brews.push(b); persist();
   return b;
@@ -1077,7 +1374,7 @@ const ACT = {
   setAvatarEmoji: el => { D.prefs.avatarType = 'emoji'; D.prefs.avatarEmoji = el.dataset.v; persist(); renderMain(true); },
   avatarUpload: () => $('#avatarFile').click(),
   avatarReset: () => { D.prefs.avatarType = 'emoji'; D.prefs.avatarImage = ''; persist(); renderMain(true); },
-  go: el => { ui.view = el.dataset.v; renderMain(); window.scrollTo(0, 0); },
+  go: el => { closeDlg(); ui.view = el.dataset.v; renderMain(); window.scrollTo(0, 0); },
   dlgClose: () => closeDlg(), dlgSave: () => dlgSave && dlgSave(),
   newRecipe: () => { const r = newRecipe(); D.recipes.push(r); ui.rid = r.id; ui.view = 'editor'; persist(); renderMain(); window.scrollTo(0, 0); },
   open: el => { ui.rid = el.dataset.id; ui.view = 'editor'; renderMain(); window.scrollTo(0, 0); },
@@ -1085,6 +1382,44 @@ const ACT = {
   sheetMode: el => { ui.sheetSteps = el.dataset.v === '1'; renderMain(true); },
   toggleSheetCost: el => { ui.sheetCost = el.checked; renderMain(true); },
   print: () => { try { window.print(); } catch { toast(t('toast_print_fallback')); } },
+  printBrew: el => {
+    const id = el.dataset.id;
+    const cards = document.querySelectorAll('#main .cards > .card[data-brewid]');
+    cards.forEach(c => { if (c.dataset.brewid !== id) c.classList.add('print-hide'); });
+    let done = false;
+    const restore = () => { if (done) return; done = true; cards.forEach(c => c.classList.remove('print-hide')); window.removeEventListener('afterprint', restore); };
+    window.addEventListener('afterprint', restore);
+    setTimeout(restore, 60000);   // filet de sécurité si « afterprint » ne se déclenche pas (anciens navigateurs)
+    try { window.print(); } catch { toast(t('toast_print_fallback')); restore(); }
+  },
+  printBrewExtra: el => {
+    const id = el.dataset.id;
+    const b = D.brews.find(x => x.id === id);
+    if (!b) return;
+    const cards = document.querySelectorAll('#main .cards > .card[data-brewid]');
+    cards.forEach(c => { if (c.dataset.brewid !== id) c.classList.add('print-hide'); });
+    let injected = null;
+    const card = document.querySelector(`#main .cards > .card[data-brewid="${id}"]`);
+    if (card) {
+      normalizeBrewExtraNotes(b);
+      const wrap = document.createElement('div');
+      wrap.innerHTML = brewExtraNotesHTML(b);
+      injected = wrap.firstElementChild;
+      injected.setAttribute('open', '');   // toujours dépliée à l'impression, même si vide
+      const actions = card.querySelector('.dlg-actions');
+      card.insertBefore(injected, actions || null);
+    }
+    let done = false;
+    const restore = () => {
+      if (done) return; done = true;
+      cards.forEach(c => c.classList.remove('print-hide'));
+      if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
+      window.removeEventListener('afterprint', restore);
+    };
+    window.addEventListener('afterprint', restore);
+    setTimeout(restore, 60000);   // filet de sécurité si « afterprint » ne se déclenche pas (anciens navigateurs)
+    try { window.print(); } catch { toast(t('toast_print_fallback')); restore(); }
+  },
   dupRecipe: () => { const r = clone(R()); r.id = uid(); r.name += ' (copie)'; r.created = r.updated = Date.now(); D.recipes.push(r); ui.rid = r.id; persist(); renderMain(); window.scrollTo(0, 0); toast(t('toast_recipe_dup')); },
   delRecipe: () => ask(t('recipe_confirm_delete', {name: esc(R().name)}), t('btn_delete'), () => { D.recipes = D.recipes.filter(x => x.id !== ui.rid); ui.view = 'recipes'; persist(); renderMain(); }),
   add: el => {
@@ -1121,12 +1456,20 @@ const ACT = {
   },
   editBrew: el => {
     const b = D.brews.find(x => x.id === el.dataset.id);
+    normalizeBrewExtraNotes(b);
     openForm(b.recipeName, [{k: 'date', l: t('brew_edit_date'), t: 'date'}, {k: 'status', l: t('brew_edit_status'), t: 'select', o: Object.entries(STATUS())}, {k: 'ogM', l: t('brew_edit_ogm'), t: 'number'}, {k: 'fgM', l: t('brew_edit_fgm'), t: 'number'},
-      {k: 'vol', l: t('brew_edit_vol'), t: 'number'}, {k: 'notes', l: t('brew_edit_notes'), t: 'textarea'}, {k: 'tasting', l: t('brew_edit_tasting'), t: 'textarea'}], b,
-      v => { Object.assign(b, v); persist(); renderMain(true); },
-      `<p class="sub">${t('brew_edit_note')}</p>`);
+      {k: 'vol', l: t('brew_edit_vol'), t: 'number'}, {k: 'notes', l: t('brew_edit_notes'), t: 'textarea', big: true}, {k: 'tasting', l: t('brew_edit_tasting'), t: 'textarea', big: true}], b,
+      v => {
+        b.date = v.date; b.status = v.status; b.ogM = v.ogM; b.fgM = v.fgM; b.vol = v.vol; b.notes = v.notes; b.tasting = v.tasting;
+        if (D.prefs.brewExtraNotes === true) b.extraNotes = readBrewExtraFromDlg();
+        persist(); renderMain(true);
+      },
+      `<p class="sub">${t('brew_edit_note')}</p>${brewFormExtraNotesHTML(b)}`);
   },
   delBrew: el => ask(t('brew_confirm_delete'), t('btn_delete'), () => { D.brews = D.brews.filter(x => x.id !== el.dataset.id); persist(); renderMain(true); }),
+  setBrewExtra: el => { D.prefs.brewExtraNotes = el.dataset.v === '1'; persist(); renderMain(true); },
+  xnAddQty: () => { const tb = $('#xn-qty-body'); if (tb) tb.insertAdjacentHTML('beforeend', brewExtraQtyExtraRow()); },
+  xnRmQty: el => { const tr = el.closest('tr'); if (tr) tr.remove(); },
   ingTab: el => { ui.tab = el.dataset.t; renderMain(true); },
   importLib: () => $('#importLibFile').click(),
   ingSort: el => { const k = el.dataset.k; if (ui.ingSort.key === k) ui.ingSort.dir = ui.ingSort.dir === 'desc' ? 'asc' : 'desc'; else ui.ingSort = {key: k, dir: 'asc'}; renderMain(true); },

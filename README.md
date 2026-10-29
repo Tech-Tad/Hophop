@@ -1,5 +1,7 @@
 # HopHop — application auto-hébergée de recettes de bière
 
+*[English version](README.en.md)*
+
 Application 100 % PHP + HTML/CSS/JavaScript vanilla. Aucune base de données :
 toutes les données sont stockées dans des fichiers JSON, sous `data/`.
 
@@ -17,16 +19,14 @@ toutes les données sont stockées dans des fichiers JSON, sous `data/`.
    chown -R www-data:www-data data   # adaptez l'utilisateur à votre serveur
    ```
 4. Ouvrez `https://votre-domaine/chemin/vers/brassin-php/` dans un
-   navigateur : la page de connexion s'affiche. Créez un compte, c'est prêt.  
-
-5. Importez dans "Ingrédients" les fichiers du répertoire `lib` pour peupler vos bibliothèques  
-
-6. Pour obtenir les styles BJCP et BA, importez les fichiers JSON disponibles sur [https://github.com/beerjson/bjcp-json/tree/main/styles](https://github.com/beerjson/bjcp-json/tree/main/styles)  
+   navigateur : la page de connexion s'affiche. Créez un compte, c'est prêt.
+5. Importez dans « Ingrédients » les fichiers du répertoire `lib` pour peupler
+   vos bibliothèques.
+6. Pour obtenir les styles BJCP et BA, importez les fichiers JSON disponibles
+   sur [https://github.com/beerjson/bjcp-json/tree/main/styles](https://github.com/beerjson/bjcp-json/tree/main/styles).
 
 Aucune étape de build, aucune dépendance à installer (`composer`, `npm`…) :
 les 6 fichiers du dossier suffisent.
-
-**Note :** le fichier 7z présent dans les releases n'inclut pas les participations tierces
 
 ## Structure
 
@@ -86,7 +86,9 @@ Comptes utilisateurs · profils matériel multiples (rendement, pertes,
 IBU, EBC, eau d'empâtage/rinçage, sucre de conditionnement) · bibliothèque
 d'ingrédients personnalisable par utilisateur · gestion de stock avec alerte
 de manque · redimensionnement de recette · historique de brassage (visé vs
-mesuré) · fiche recette imprimable · export BeerXML 1.0 et BeerJSON 1.0.
+mesuré), avec sous-formulaire optionnel « Autres notes » (quantités réelles,
+températures, pH, densités et volumes du jour de brassage — activable dans
+Compte) · fiche recette imprimable · export BeerXML 1.0 et BeerJSON 1.0.
 
 Unités européennes partout (L, kg, g, °C, EBC, densité SG).
 
@@ -128,6 +130,6 @@ les déplacer dans `lang/` pour les activer.
 
 ## Licence
 
-**HopHop** © claude.ai & Penn-Maen — [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr)
+**HopHop** © claude.ai, Penn-Maen, Jean-Luc — [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.fr)
 (Attribution – Pas d'Utilisation Commerciale – Partage dans les Mêmes Conditions).
 Texte complet dans [`LICENSE.md`](LICENSE.md).
