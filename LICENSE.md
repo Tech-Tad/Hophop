@@ -1,5 +1,7 @@
 # Licence
 
+*[English version](LICENSE.en.md)*
+
 **HopHop** © claude.ai, Penn-Maen, Jean-Luc
 
 Cette œuvre est mise à disposition selon les termes de la licence
