@@ -118,6 +118,10 @@ Les gabarits fournis dans `lang-available/` (espagnol, portugais, italien,
 allemand) sont déjà entièrement traduits et prêts à l'emploi ; il suffit de
 les déplacer dans `lang/` pour les activer.
 
+## Notes développeurs
+
+- **BeerXML et `<?xml`** : la déclaration `<?xml …?>` en tête des **fichiers `.xml` BeerXML** (export, import, guides) est normale ; **`short_open_tag` ne s’applique pas** à ces fichiers. En revanche, la même ligne **dans le source d’un `.php`** (ex. JS inline de `index.php`) provoque une page blanche si `short_open_tag = On`. HopHop utilise une concaténation JS dans `toBeerXML()`. Voir [`docs/php-beerxml-short-tags.md`](docs/php-beerxml-short-tags.md).
+
 ## Limites connues
 
 - Un fichier JSON par compte : convient très bien à un usage personnel ou
