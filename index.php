@@ -13,10 +13,17 @@ $FAVICON_SVG = $LOGO_SVG !== '' ? str_replace('fill="currentColor"', 'fill="#2d4
 // ${t('lang_title')} : préférence enregistrée du compte (si connecté) sinon détection du navigateur, repli sur le français.
 $AVAILABLE_LANGS = hh_available_langs();
 $SAVED_LANG = null;
-$CUR_USER0 = current_user();
-if ($CUR_USER0) {
+$ctx0 = function_exists('hophop_user_context') ? hophop_user_context() : null;
+if ($ctx0) {
+    $d0 = hophop_user_store_load($ctx0);
+    if (is_array($d0) && isset($d0['prefs']['lang'])) {
+        $SAVED_LANG = (string) $d0['prefs']['lang'];
+    }
+} elseif (($CUR_USER0 = current_user())) {
     $d0 = read_json(user_file($CUR_USER0), null);
-    if (is_array($d0) && isset($d0['prefs']['lang'])) $SAVED_LANG = (string) $d0['prefs']['lang'];
+    if (is_array($d0) && isset($d0['prefs']['lang'])) {
+        $SAVED_LANG = (string) $d0['prefs']['lang'];
+    }
 }
 $CUR_LANG = hh_resolve_lang($SAVED_LANG, $AVAILABLE_LANGS);
 $LANG = hh_lang_strings($CUR_LANG);
@@ -90,6 +97,7 @@ button{font:inherit;cursor:pointer}
 .brand-logo{width:1.7rem;height:1.7rem;display:inline-flex;flex:none;color:var(--head)}
 .brand-logo svg{width:100%;height:100%;display:block}
 .grow{flex:1}
+.top-forum{flex:none;white-space:normal;text-align:center;text-decoration:none;box-sizing:border-box}
 .who{font-size:.9rem;color:var(--muted);display:flex;align-items:center;gap:.4rem}
 .avatar{width:1.8rem;height:1.8rem;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex:none;overflow:hidden;line-height:1}
 .avatar img{width:100%;height:100%;object-fit:cover;display:block}
@@ -125,6 +133,8 @@ output{padding:.55rem 0;font-weight:600;color:var(--head)}
 
 .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1rem;margin-bottom:1rem}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1rem}
+.cards>.card{min-width:0}
+.cards>.card .dlg-actions{flex-wrap:wrap;justify-content:flex-start;gap:.4rem}
 .rcard{cursor:pointer;display:flex;flex-direction:column;gap:.5rem;text-align:left;width:100%;color:inherit;margin:0}
 .rcard:hover{border-color:var(--accent)}
 .rcard .meta{display:flex;flex-wrap:wrap;gap:.35rem}
@@ -155,6 +165,13 @@ output{padding:.55rem 0;font-weight:600;color:var(--head)}
 dl.kv{margin:0;display:grid;grid-template-columns:1fr auto;gap:.2rem .8rem;font-size:.92rem}
 dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;font-weight:600;text-align:right}
 .warn{background:var(--dangerbg);color:var(--danger);border-radius:8px;padding:.4rem .6rem;font-size:.85rem;margin-top:.5rem}
+.foot-usage{text-align:center;color:var(--muted);font-size:.75rem;margin:1.6rem 0 0;opacity:.72}
+.style-line{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.style-line select{flex:1 1 12rem;min-width:0;width:auto}
+.br-style-row{display:flex;align-items:center;gap:.45rem;cursor:pointer;color:var(--text);font-size:.95rem;margin:0}
+.br-style-row input[type=radio]{width:auto;min-width:0;flex:none;margin:0;padding:0;accent-color:var(--accent)}
+.account-id{display:flex;gap:.8rem;align-items:center;min-width:0}
+.account-id > div{min-width:0}
 
 .tbl{width:100%;border-collapse:collapse;font-size:.95rem}
 .tbl th{text-align:left;font-size:.75rem;text-transform:uppercase;color:var(--muted);letter-spacing:.04em;padding:.4rem .5rem;border-bottom:2px solid var(--line)}
@@ -395,7 +412,8 @@ async function api(action, payload = {}) {
   if (!j.ok) throw new Error(j.error || t('err_unknown'));
   return j;
 }
-let USER = null, D = null;                    // utilisateur courant et ses données
+let USER = null, D = null;
+const AUTH = {mode: 'standalone', features: {register: true, local_login: true, delete_account: true}, login_url: '', logout_url: '', brewrecipes_share_url: '', brewrecipes_style_guides_url: '', brewrecipes_styles_url: '', avatar_url: '', mysql_ready: true, blocked: '', brewer_count: null, visitor_count: null};                    // utilisateur courant et ses données
 const ui = {view: 'recipes', rid: null, q: '', tab: 'ferm', auth: 'login', showArchivedIng: false, sheetSteps: true, sheetCost: true, ingSort: {key: 'name', dir: 'asc'}};
 const R = () => D && D.recipes.find(r => r.id === ui.rid);
 
@@ -477,10 +495,14 @@ function resizeAvatarImage(file) {
 }
 const AVATAR_PICKS = ['🍺', '🍻', '🌾', '🍯', '🔥', '🧉', '🍋', '🫐'];
 function avatarHTML(cls) {
-  const p = D.prefs;
-  return p.avatarType === 'image' && p.avatarImage
-    ? `<span class="avatar ${cls || ''}"><img src="${p.avatarImage}" alt=""></span>`
-    : `<span class="avatar ${cls || ''}">${esc(p.avatarEmoji || '🍺')}</span>`;
+  const p = D?.prefs || {};
+  if (p.avatarType === 'image' && p.avatarImage) {
+    return `<span class="avatar ${cls || ''}"><img src="${p.avatarImage}" alt=""></span>`;
+  }
+  if (AUTH.mode === 'phpbb' && AUTH.avatar_url) {
+    return `<span class="avatar ${cls || ''}"><img src="${esc(AUTH.avatar_url)}" alt=""></span>`;
+  }
+  return `<span class="avatar ${cls || ''}">${esc(p.avatarEmoji || '🍺')}</span>`;
 }
 const THEMES = () => [['vert', t('theme_vert')], ['ambre', t('theme_ambre')], ['ble', t('theme_ble')], ['myrtille', t('theme_myrtille')], ['sombre', t('theme_sombre')]];
 function applyPrefs() {
@@ -494,13 +516,69 @@ async function enterApp(name) {
   D = normalizeData(r.data);
   if (D.prefs.lang !== CUR_LANG && AVAILABLE_LANGS.includes(D.prefs.lang)) { location.reload(); return; }
   applyPrefs();
-  ui.view = 'recipes'; render();
+  ui.view = 'recipes';
+  render();
+  await maybeConsumeBrewRecipesImport();
+}
+/** BeerXML en attente après POST import_preview.php (BrewRecipes → HopHop). */
+async function maybeConsumeBrewRecipesImport() {
+  const params = new URLSearchParams(location.search);
+  if (params.get('brewrecipes_import') !== '1') return;
+  try {
+    const pending = await api('consume_brewrecipes_import');
+    const added = importBeerXML(pending.beerxml);
+    if (added.length === 1) {
+      if (pending.brewrecipes_id) added[0].brewrecipesId = pending.brewrecipes_id;
+      ui.rid = added[0].id;
+      ui.view = 'editor';
+      renderMain();
+      window.scrollTo(0, 0);
+    } else {
+      renderMain(true);
+    }
+    const saved = await saveNow();
+    toast(saved
+      ? (added.length > 1 ? t('br_import_many', {n: added.length}) : t('br_import_one'))
+      : t('br_import_unsaved'));
+  } catch (e) {
+    toast(e.message || t('br_import_fail'));
+  }
+  params.delete('brewrecipes_import');
+  params.delete('brewrecipes_id');
+  const qs = params.toString();
+  history.replaceState(null, '', qs ? (location.pathname + '?' + qs) : location.pathname);
 }
 async function logout() {
+  if (AUTH.mode === 'phpbb' && AUTH.logout_url) { window.location.href = AUTH.logout_url; return; }
   try { await api('logout'); } catch {}
   USER = D = null; ui.auth = 'login';
   document.documentElement.removeAttribute('data-theme'); document.documentElement.removeAttribute('data-density');
   render();
+}
+function applySessionMeta(s) {
+  AUTH.mode = s.auth_mode || 'standalone';
+  AUTH.features = s.features || AUTH.features;
+  AUTH.login_url = s.login_url || '';
+  AUTH.logout_url = s.logout_url || '';
+  AUTH.brewrecipes_share_url = s.brewrecipes_share_url || '';
+  AUTH.brewrecipes_style_guides_url = s.brewrecipes_style_guides_url || '';
+  AUTH.brewrecipes_styles_url = s.brewrecipes_styles_url || '';
+  AUTH.avatar_url = s.avatar_url || '';
+  AUTH.mysql_ready = s.mysql_ready !== false;
+  AUTH.blocked = s.blocked || '';
+  const usageOk = AUTH.mode === 'phpbb';
+  AUTH.brewer_count = (usageOk && typeof s.brewer_count === 'number' && s.brewer_count >= 0) ? s.brewer_count : null;
+  AUTH.visitor_count = (usageOk && typeof s.visitor_count === 'number' && s.visitor_count >= 0) ? s.visitor_count : null;
+}
+function brewrecipesShareUrl() { return AUTH.brewrecipes_share_url || ''; }
+function brewrecipesStyleGuidesUrl() { return AUTH.brewrecipes_style_guides_url || ''; }
+function brewrecipesStylesUrl() { return AUTH.brewrecipes_styles_url || ''; }
+const countLabel = (n, one, many) => (n === 1 ? '1 ' + one : f(n, 0) + ' ' + many);
+function pageFootExtra() {
+  const brewers = AUTH.mode === 'phpbb' ? AUTH.brewer_count : null;
+  const visitors = AUTH.mode === 'phpbb' ? AUTH.visitor_count : null;
+  if (typeof brewers !== 'number' || typeof visitors !== 'number') return '';
+  return `<p class="foot-usage noprint">${countLabel(brewers, t('foot_brewer_one'), t('foot_brewer_many'))} ${t('foot_on_hophop')} ${countLabel(visitors, t('foot_visitor_one'), t('foot_visitor_many'))}</p>`;
 }
 
 /* ---------- 3. LIBELLÉS & GABARITS ---------- */
@@ -656,11 +734,30 @@ const libOpts = (typ, sel) => {
 };
 
 function authHTML() {
-  const reg = ui.auth === 'register';
+  if (AUTH.mode === 'phpbb' && AUTH.blocked === 'robot') {
+    return `<div class="authscreen"><div class="auth-bg" aria-hidden="true">${LOGO_SVG}</div><div class="wrap"><div class="auth card">
+    <h1 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:.5rem"><span class="brand-logo" style="width:2.2rem;height:2.2rem">${LOGO_SVG}</span>HopHop</h1>
+    <p class="err" role="alert">${t('auth_robot_blocked')}</p>
+  </div></div></div>`;
+  }
+  if (AUTH.mode === 'phpbb') {
+    const loginBtn = AUTH.login_url
+      ? `<a class="btn" href="${esc(AUTH.login_url)}" style="width:100%;text-align:center;text-decoration:none;display:inline-block;box-sizing:border-box">${t('auth_forum_login')}</a>`
+      : `<p class="err">${t('auth_forum_login_unavail')}</p>`;
+    const dbWarn = AUTH.mysql_ready === false
+      ? `<p class="err" role="alert">${t('auth_mysql_warn')}</p>` : '';
+    return `<div class="authscreen"><div class="auth-bg" aria-hidden="true">${LOGO_SVG}</div><div class="wrap"><div class="auth card">
+    <h1 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:.5rem"><span class="brand-logo" style="width:2.2rem;height:2.2rem">${LOGO_SVG}</span>HopHop</h1>
+    <p class="sub" style="text-align:center">${t('auth_forum_tagline')}</p>
+    ${dbWarn}${loginBtn}
+    <p class="sub" style="margin-bottom:0">${t('auth_forum_refresh')}</p>
+  </div><p class="sub" style="text-align:center;margin-top:1rem">${LICENSE_HTML}</p></div></div>`;
+  }
+  const reg = ui.auth === 'register' && AUTH.features.register;
   return `<div class="authscreen"><div class="auth-bg" aria-hidden="true">${LOGO_SVG}</div><div class="wrap"><div class="auth card">
     <h1 style="text-align:center;display:flex;align-items:center;justify-content:center;gap:.5rem"><span class="brand-logo" style="width:2.2rem;height:2.2rem">${LOGO_SVG}</span>HopHop</h1>
     <p class="sub" style="text-align:center">${t('auth_tagline')}</p>
-    <div class="seg"><button data-act="authMode" data-m="login" aria-pressed="${!reg}">${t('auth_login_tab')}</button><button data-act="authMode" data-m="register" aria-pressed="${reg}">${t('auth_register_tab')}</button></div>
+    ${AUTH.features.register ? `<div class="seg"><button data-act="authMode" data-m="login" aria-pressed="${!reg}">${t('auth_login_tab')}</button><button data-act="authMode" data-m="register" aria-pressed="${reg}">${t('auth_register_tab')}</button></div>` : ''}
     <div class="fgrid" style="grid-template-columns:1fr">
       ${fld(t('auth_username'), '<input id="a-user" autocomplete="username" autocapitalize="off">')}
       ${fld(t('auth_password'), '<input id="a-pw" type="password" autocomplete="' + (reg ? 'new-password' : 'current-password') + '">')}
@@ -675,11 +772,14 @@ function authHTML() {
 function shellHTML() {
   const cur = ['editor', 'sheet'].includes(ui.view) ? 'recipes' : ui.view;
   const T = [['recipes', t('nav_recipes')], ['brews', t('nav_brews')], ['ings', t('ings_title')], ['profiles', t('profiles_title')], ['account', t('account_title')]];
+  const forumBack = AUTH.mode === 'phpbb'
+    ? `<a class="btn ghost sm top-forum" href="/forum/" style="text-decoration:none">${t('nav_forum_back')}</a>`
+    : `<button class="btn ghost sm top-forum" data-act="logout">${t('nav_logout')}</button>`;
   return `<header class="top"><div class="in"><div class="brand"><span class="brand-logo">${LOGO_SVG}</span>HopHop</div><div class="grow"></div>
-    <span class="savestate" id="savestate"></span><span class="who">${avatarHTML()}${esc(USER)}</span><button class="btn ghost sm" data-act="logout">${t('nav_logout')}</button></div>
+    <div class="top-user"><span class="savestate" id="savestate"></span><span class="who">${avatarHTML()}<span class="uname">${esc(USER)}</span></span></div>${forumBack}</div>
     <nav class="tabs" aria-label="Navigation principale">${T.map(([v, l]) => `<button data-act="go" data-v="${v}" ${cur === v ? 'aria-current="page"' : ''}>${l}</button>`).join('')}</nav></header>
     <main class="wrap" id="main"></main>
-    <footer class="sitefooter noprint"><p class="sub" style="text-align:center;margin:0">${LICENSE_HTML}</p></footer>`;
+    <footer class="sitefooter noprint">${pageFootExtra()}<p class="sub" style="text-align:center;margin-top:.2rem"><a href="help.html" style="color:inherit">${t('nav_help')}</a> — ${LICENSE_HTML}</p></footer>`;
 }
 
 function recipeCard(r) {
@@ -754,7 +854,7 @@ function viewEditor() {
   <div class="editor"><div>
     <section class="card"><input class="namefield" data-b="name" value="${esc(r.name)}" aria-label="${t('editor_name_aria')}" style="margin-bottom:.8rem">
       <div class="fgrid">
-        ${fld(t('fld_style'), `<select data-b="styleId">${styleSelectOpts(r.styleId)}</select>`, 'span2')}
+        ${fld(t('fld_style'), `<div class="style-line"><select data-b="styleId">${styleSelectOpts(r.styleId)}</select>${brewrecipesStyleGuidesUrl() ? `<button type="button" class="btn ghost sm" data-act="pickBrewRecipesStyle">${t('br_pick_style')}</button>` : ''}</div>`, 'span2')}
         ${fld(t('fld_profile'), `<select data-b="profileId">${libProfiles(r.profileId)}</select>`)}
         ${fld(t('fld_batch'), bi('batch', r.batch, 1))}
         ${fld(t('fld_ratio'), bi('ratio', r.ratio, 1))}
@@ -779,6 +879,7 @@ function viewEditor() {
       <div class="fgrid" style="align-items:end">${fld(t('resize_newvol'), `<input id="newvol" inputmode="decimal" value="${esc(r.batch)}">`)}<div class="sub" id="kfac"></div></div>
       <div class="dlg-actions" style="justify-content:flex-start"><button class="btn ghost sm" data-act="resizeApply">${t('resize_apply')}</button><button class="btn ghost sm" data-act="resizeCopy">${t('resize_copy')}</button></div></section>
     <section class="card"><h2>${t('export_title')}</h2><div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0">
+      ${brewrecipesShareUrl() ? `<button class="btn sm" data-act="shareBrewRecipes">${t('br_share')}</button>` : ''}
       <button class="btn ghost sm" data-act="exp" data-k="xml">${t('export_xml')}</button><button class="btn ghost sm" data-act="exp" data-k="json">${t('export_json')}</button>
       <button class="btn ghost sm" data-act="dupRecipe">Dupliquer</button><button class="btn danger sm" data-act="delRecipe">Supprimer</button></div></section>
   </div><aside class="stats" id="stats"></aside></div>`;
@@ -1164,7 +1265,7 @@ function viewBrews() {
     ${b.notes ? `<div style="margin-top:.7rem"><h3 style="margin:0 0 .2rem">${t('brew_edit_notes')}</h3><p style="white-space:pre-wrap;margin:0;font-size:1rem">${esc(b.notes)}</p></div>` : ''}
     ${b.tasting ? `<div style="margin-top:.7rem"><h3 style="margin:0 0 .2rem">${t('brew_edit_tasting')}</h3><p style="white-space:pre-wrap;margin:0;font-size:1rem">${esc(b.tasting)}</p></div>` : ''}
     ${D.prefs.brewExtraNotes && brewExtraNotesFilled(b) ? `<p class="brew-extra-chip">${t('xn_chip_filled')}</p>` : ''}
-    <div class="dlg-actions noprint" style="justify-content:flex-start"><button class="btn ghost sm" data-act="editBrew" data-id="${b.id}">${t('ing_edit')}</button><button class="btn ghost sm" data-act="printBrew" data-id="${b.id}">${t('sheet_print')}</button>${D.prefs.brewExtraNotes === true ? `<button class="btn ghost sm" data-act="printBrewExtra" data-id="${b.id}">${t('xn_print_plus')}</button>` : ''}<button class="btn danger sm" data-act="delBrew" data-id="${b.id}">${t('btn_delete')}</button></div></div>`; }).join('')}</div>`
+    <div class="dlg-actions noprint brew-card-actions"><button class="btn ghost sm" data-act="editBrew" data-id="${b.id}">${t('ing_edit')}</button><button class="btn ghost sm" data-act="printBrew" data-id="${b.id}">${t('sheet_print')}</button>${D.prefs.brewExtraNotes === true ? `<button class="btn ghost sm" data-act="printBrewExtra" data-id="${b.id}">${t('xn_print_plus')}</button>` : ''}<button class="btn danger sm" data-act="delBrew" data-id="${b.id}">${t('btn_delete')}</button></div></div>`; }).join('')}</div>`
     : `<div class="empty">${t('brews_empty')}</div>`}`;
 }
 
@@ -1238,19 +1339,31 @@ function viewProfiles() {
 /* --- Compte --- */
 function viewAccount() {
   return `<div class="bar"><h1>${t('account_title')}</h1></div>
-  <div class="card"><div style="display:flex;gap:.8rem;align-items:center">${avatarHTML('lg')}<div><h2 style="margin:0">${esc(USER)}</h2><p class="sub" style="margin:.1rem 0 0">${t('account_summary', {recipes: D.recipes.length, brews: D.brews.length, profiles: D.profiles.length})}</p></div></div>
-    <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:.8rem 0 0"><button class="btn ghost sm" data-act="logout">${t('account_logout')}</button></div></div>
+  <div class="card"><div class="account-id">${avatarHTML('lg')}<div><h2 style="margin:0">${esc(USER)}</h2><p class="sub" style="margin:.1rem 0 0">${t('account_summary', {recipes: D.recipes.length, brews: D.brews.length, profiles: D.profiles.length})}</p></div></div>
+    <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:.8rem 0 0">
+      <a class="btn ghost sm" href="help.html" style="text-decoration:none">${t('nav_help')}</a>
+      ${AUTH.mode === 'phpbb'
+      ? `<a class="btn ghost sm" href="/forum/" style="text-decoration:none">${t('nav_forum_back')}</a>`
+      : `<button class="btn ghost sm" data-act="logout">${t('account_logout')}</button>`}
+    </div></div>
   <div class="card"><h2>${t('account_language_title')}</h2>
     <div class="seg">${AVAILABLE_LANGS.map(k => `<button data-act="setLang" data-v="${k}" aria-pressed="${D.prefs.lang === k}">${esc(LANG_NATIVE_NAMES[k] || k)}</button>`).join('')}</div>
     <p class="sub" style="margin-bottom:0">${t('account_language_note')}</p></div>
   <div class="card"><h2>${t('avatar_title')}</h2>
-    <p class="sub" style="margin-top:0">${t('avatar_note')}</p>
+    ${AUTH.mode === 'phpbb'
+      ? `<p class="sub" style="margin-top:0">${t('avatar_forum_note')}${AUTH.avatar_url ? '' : t('avatar_forum_none')}</p>
+        <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0">
+          <button class="btn ghost sm" data-act="avatarUpload">${t('avatar_upload_hophop')}</button>
+          <input type="file" id="avatarFile" accept="image/*" style="display:none">
+          ${D.prefs.avatarType === 'image' ? `<button class="btn ghost sm" data-act="avatarReset">${t('avatar_reset_forum')}</button>` : ''}
+        </div>`
+      : `<p class="sub" style="margin-top:0">${t('avatar_note')}</p>
     <div class="avatar-picks">${AVATAR_PICKS.map(e => `<button data-act="setAvatarEmoji" data-v="${e}" aria-pressed="${D.prefs.avatarType === 'emoji' && D.prefs.avatarEmoji === e}">${e}</button>`).join('')}</div>
     <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0">
       <button class="btn ghost sm" data-act="avatarUpload">${t('avatar_upload')}</button>
       <input type="file" id="avatarFile" accept="image/*" style="display:none">
       ${D.prefs.avatarType === 'image' ? `<button class="btn ghost sm" data-act="avatarReset">${t('avatar_reset')}</button>` : ''}
-    </div></div>
+    </div>`}</div>
   <div class="card"><h2>${t('appearance_title')}</h2>
     <h3>${t('appearance_theme')}</h3><div class="seg">${THEMES().map(([k, l]) => `<button data-act="setTheme" data-v="${k}" aria-pressed="${D.prefs.theme === k}">${l}</button>`).join('')}</div>
     <h3>${t('appearance_density')}</h3><div class="seg">
@@ -1276,7 +1389,7 @@ function viewAccount() {
     <p class="sub" style="margin-bottom:0">${t('xn_toggle_note')}</p></div>
   <div class="card"><h2>${t('backup_title')}</h2><p class="sub" style="margin-top:0">${t('backup_note')}</p>
     <div class="dlg-actions" style="justify-content:flex-start;flex-wrap:wrap;margin:0"><button class="btn ghost sm" data-act="backup">${t('backup_export')}</button><button class="btn ghost sm" data-act="restore">${t('backup_import')}</button><input type="file" id="restoreFile" accept=".json,application/json" style="display:none"></div></div>
-  <div class="card"><h2>${t('danger_zone')}</h2><button class="btn danger sm" data-act="delAccount">${t('delete_account_btn')}</button></div>`;
+  ${AUTH.features.delete_account ? `<div class="card"><h2>${t('danger_zone')}</h2><button class="btn danger sm" data-act="delAccount">${t('delete_account_btn')}</button></div>` : ''}`;
 }
 
 /* --- Rendu général --- */
@@ -1364,6 +1477,36 @@ function openStockDeductDialog(r) {
 const brewFields = [{k: 'date', l: t('brew_date_target'), t: 'date'}, {k: 'deduct', l: t('brew_deduct'), t: 'check'}];
 const profDefaults = () => ({name: t('new_profile_name'), batch: 20, boil: 60, evap: 3, trub: 1.5, mashLoss: 1, absorb: 1, ratio: 3, infusionTemp: 96, shrink: 4, eff: 72, mashMethod: 'classic', biabSqueeze: false, mashTunMax: 0});
 
+/** Retire les blocs « Autres notes » injectés pour Print+ (filet si revert incomplet). */
+function clearPrintInjections() {
+  document.querySelectorAll('#main .print-inject').forEach(el => el.remove());
+}
+
+/** Impression navigateur : revert dès que print() rend la main (Annuler ou Imprimer) + afterprint / matchMedia en secours. */
+function printWithRevert(revert) {
+  let finished = false;
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    revert();
+    window.removeEventListener('afterprint', finish);
+    mq.removeEventListener('change', onMq);
+  };
+  const mq = window.matchMedia('print');
+  const onMq = () => { if (!mq.matches) finish(); };
+  window.addEventListener('afterprint', finish);
+  mq.addEventListener('change', onMq);
+  try {
+    window.print();
+  } catch {
+    toast(t('toast_print_fallback'));
+  } finally {
+    // Sur Chrome/Safari/Firefox, print() bloque jusqu’à fermeture du dialogue : finally = Annuler ou OK.
+    finish();
+  }
+  setTimeout(finish, 500);
+}
+
 const ACT = {
   authMode: el => { ui.auth = el.dataset.m; render(); }, authGo: () => authSubmit(), logout: () => logout(),
   setLang: el => { const v = el.dataset.v; if (v === D.prefs.lang) return; D.prefs.lang = v; persist(); saveNow().then(() => location.reload()); },
@@ -1386,11 +1529,7 @@ const ACT = {
     const id = el.dataset.id;
     const cards = document.querySelectorAll('#main .cards > .card[data-brewid]');
     cards.forEach(c => { if (c.dataset.brewid !== id) c.classList.add('print-hide'); });
-    let done = false;
-    const restore = () => { if (done) return; done = true; cards.forEach(c => c.classList.remove('print-hide')); window.removeEventListener('afterprint', restore); };
-    window.addEventListener('afterprint', restore);
-    setTimeout(restore, 60000);   // filet de sécurité si « afterprint » ne se déclenche pas (anciens navigateurs)
-    try { window.print(); } catch { toast(t('toast_print_fallback')); restore(); }
+    printWithRevert(() => cards.forEach(c => c.classList.remove('print-hide')));
   },
   printBrewExtra: el => {
     const id = el.dataset.id;
@@ -1405,20 +1544,15 @@ const ACT = {
       const wrap = document.createElement('div');
       wrap.innerHTML = brewExtraNotesHTML(b);
       injected = wrap.firstElementChild;
-      injected.setAttribute('open', '');   // toujours dépliée à l'impression, même si vide
+      injected.setAttribute('open', '');   // déplié pour l'aperçu papier uniquement (retiré après le dialogue)
+      injected.classList.add('print-inject');
       const actions = card.querySelector('.dlg-actions');
       card.insertBefore(injected, actions || null);
     }
-    let done = false;
-    const restore = () => {
-      if (done) return; done = true;
+    printWithRevert(() => {
       cards.forEach(c => c.classList.remove('print-hide'));
-      if (injected && injected.parentNode) injected.parentNode.removeChild(injected);
-      window.removeEventListener('afterprint', restore);
-    };
-    window.addEventListener('afterprint', restore);
-    setTimeout(restore, 60000);   // filet de sécurité si « afterprint » ne se déclenche pas (anciens navigateurs)
-    try { window.print(); } catch { toast(t('toast_print_fallback')); restore(); }
+      clearPrintInjections();
+    });
   },
   dupRecipe: () => { const r = clone(R()); r.id = uid(); r.name += ' (copie)'; r.created = r.updated = Date.now(); D.recipes.push(r); ui.rid = r.id; persist(); renderMain(); window.scrollTo(0, 0); toast(t('toast_recipe_dup')); },
   delRecipe: () => ask(t('recipe_confirm_delete', {name: esc(R().name)}), t('btn_delete'), () => { D.recipes = D.recipes.filter(x => x.id !== ui.rid); ui.view = 'recipes'; persist(); renderMain(); }),
@@ -1440,6 +1574,8 @@ const ACT = {
     D.recipes.push(c); ui.rid = c.id; persist(); renderMain(); window.scrollTo(0, 0); toast(t('toast_resized_copy'));
   },
   exp: el => showExport(el.dataset.k),
+  shareBrewRecipes: () => shareToBrewRecipes(),
+  pickBrewRecipesStyle: () => openBrewRecipesStylePicker(),
   brewFrom: () => openForm(t('editor_brewfrom'), brewFields, {date: today(), deduct: false}, v => {
     const r = R(); createBrew(r, v.date || today());
     if (v.deduct) { openStockDeductDialog(r); return false; }
@@ -1948,6 +2084,205 @@ function copyText(txt) {
   fallbackCopy();
   function fallbackCopy() { const ta = $('#exptxt'); ta.select(); try { document.execCommand('copy'); toast(t('toast_copied')); } catch { toast(t('toast_copy_manual')); } }
 }
+async function shareToBrewRecipes() {
+  const url = brewrecipesShareUrl();
+  if (!url) { toast('Partage BrewRecipes indisponible.'); return; }
+  const r = R();
+  if (!r) { toast('Ouvrez une recette.'); return; }
+  const xml = toBeerXML(r);
+  toast('Envoi vers BrewRecipes…');
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {'Content-Type': 'application/xml; charset=UTF-8'},
+      body: xml,
+      redirect: 'follow',
+    });
+    if (res.redirected || res.ok) {
+      window.location.href = res.url;
+      return;
+    }
+    const msg = (await res.text()).trim();
+    toast(msg.slice(0, 160) || `Erreur BrewRecipes (${res.status})`);
+  } catch {
+    toast('Impossible de contacter BrewRecipes.');
+  }
+}
+
+/** Sélecteur de style BrewRecipes (guide → liste → Enregistrer). */
+async function openBrewRecipesStylePicker() {
+  const guidesUrl = brewrecipesStyleGuidesUrl(), stylesUrl = brewrecipesStylesUrl();
+  if (!guidesUrl || !stylesUrl) { toast('Catalogue BrewRecipes indisponible.'); return; }
+  const r = R();
+  if (!r) { toast('Ouvrez une recette.'); return; }
+  let stylesCache = [], selectedIdx = null;
+  dlgSave = () => {
+    if (selectedIdx == null || !stylesCache[selectedIdx]) { toast('Choisissez un style dans la liste.'); return; }
+    applyBrewRecipesStyle(stylesCache[selectedIdx]);
+  };
+  showDlg(`<h2>Style BrewRecipes</h2>
+    <p class="sub" style="margin-top:0">Choisissez un guide, puis un style : les données sont copiées dans votre bibliothèque HopHop et associées à cette recette.</p>
+    <label class="sub" for="br-guide">Guide</label>
+    <select id="br-guide" style="width:100%;margin:.3rem 0 .6rem" disabled><option>Chargement…</option></select>
+    <label class="sub" for="br-style-q">Rechercher</label>
+    <input id="br-style-q" type="search" placeholder="Nom, code (ex. IPA, 21A)…" autocomplete="off" disabled style="width:100%;margin:.3rem 0 .6rem">
+    <div id="br-styles" class="sub">Sélectionnez un guide.</div>
+    <div class="dlg-actions"><button class="btn ghost" data-act="dlgClose">Annuler</button><button class="btn" id="br-style-save" data-act="dlgSave" disabled>Enregistrer</button></div>`);
+  const guideEl = $('#br-guide'), listEl = $('#br-styles'), qEl = $('#br-style-q'), saveEl = $('#br-style-save');
+  const syncSave = () => { saveEl.disabled = selectedIdx == null || !stylesCache[selectedIdx]; };
+  const renderStyles = () => {
+    if (!stylesCache.length) { syncSave(); return; }
+    const needle = (qEl.value || '').trim().toLowerCase();
+    const matches = stylesCache
+      .map((s, i) => ({s, i}))
+      .filter(({s}) => !needle || String(s.label || s.name || '').toLowerCase().includes(needle)
+        || String(s.name || '').toLowerCase().includes(needle)
+        || String(s.category || '').toLowerCase().includes(needle));
+    if (selectedIdx != null && !matches.some(m => m.i === selectedIdx)) selectedIdx = null;
+    listEl.innerHTML = matches.length
+      ? `<div style="max-height:16rem;overflow:auto;display:flex;flex-direction:column;gap:.35rem" role="radiogroup" aria-label="Styles">`
+        + matches.map(({s, i}) => `<label class="br-style-row"><input type="radio" name="br-style" value="${i}"${selectedIdx === i ? ' checked' : ''}><span>${esc(s.label || s.name)}</span></label>`).join('')
+        + `</div>`
+      : '<p class="sub" style="margin:0">Aucun style ne correspond.</p>';
+    listEl.querySelectorAll('input[name="br-style"]').forEach(inp => {
+      inp.onchange = () => { selectedIdx = +inp.value; syncSave(); };
+    });
+    syncSave();
+  };
+  qEl.oninput = () => renderStyles();
+  try {
+    const res = await fetch(guidesUrl, {credentials: 'include'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const guides = data.guides || [];
+    if (!guides.length) {
+      guideEl.innerHTML = '<option value="">Aucun guide</option>';
+      listEl.textContent = 'Aucun guide de styles dans BrewRecipes.';
+      return;
+    }
+    guideEl.innerHTML = '<option value="">— Choisir un guide —</option>'
+      + guides.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+    guideEl.disabled = false;
+    const load = async (guide) => {
+      stylesCache = [];
+      selectedIdx = null;
+      qEl.value = '';
+      qEl.disabled = true;
+      syncSave();
+      await loadBrewRecipesStylesList(guide, listEl, stylesUrl, (styles) => {
+        stylesCache = styles || [];
+        qEl.disabled = !stylesCache.length;
+        renderStyles();
+        if (stylesCache.length) qEl.focus();
+      });
+    };
+    const bjcp = guides.find(g => /^BJCP/i.test(g));
+    if (bjcp) { guideEl.value = bjcp; await load(bjcp); }
+    guideEl.onchange = () => load(guideEl.value);
+  } catch {
+    guideEl.innerHTML = '<option value="">Erreur</option>';
+    listEl.textContent = 'Impossible de charger les guides BrewRecipes.';
+  }
+}
+
+async function loadBrewRecipesStylesList(guide, listEl, stylesUrl, onLoaded) {
+  if (!guide) {
+    listEl.innerHTML = '<p class="sub">Sélectionnez un guide.</p>';
+    onLoaded([]);
+    return;
+  }
+  listEl.innerHTML = '<p class="sub">Chargement des styles…</p>';
+  try {
+    const sep = stylesUrl.includes('?') ? '&' : '?';
+    const res = await fetch(stylesUrl + sep + 'guide=' + encodeURIComponent(guide), {credentials: 'include'});
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const styles = data.styles || [];
+    if (!styles.length) {
+      listEl.innerHTML = '<p class="sub">Aucun style pour ce guide.</p>';
+      onLoaded([]);
+      return;
+    }
+    onLoaded(styles);
+  } catch {
+    listEl.innerHTML = '<p class="sub">Erreur de chargement des styles.</p>';
+    onLoaded([]);
+  }
+}
+
+function applyBrewRecipesStyle(style) {
+  const r = R();
+  if (!r || !style || !style.name) { toast('Style invalide.'); return; }
+  const st = upsertStyle(style.name, style.guide || '', {
+    category: style.category || '',
+    type: style.type || 'other',
+    ogMin: N(style.ogMin), ogMax: N(style.ogMax),
+    fgMin: N(style.fgMin), fgMax: N(style.fgMax),
+    ibuMin: N(style.ibuMin), ibuMax: N(style.ibuMax),
+    colorMin: N(style.colorMin), colorMax: N(style.colorMax),
+    abvMin: N(style.abvMin), abvMax: N(style.abvMax),
+    note: style.note || '',
+  });
+  if (!st) { toast('Impossible d’enregistrer le style.'); return; }
+  r.styleId = st.id;
+  r.style = st.name;
+  r.updated = Date.now();
+  closeDlg();
+  persist();
+  renderMain(true);
+  toast('Style « ' + styleComposite(st) + ' » associé à la recette.');
+}
+/** « 21A » → numéro + lettre. `category` stocke ce code, ou un nom de catégorie s’il n’y a pas de code. */
+function splitStyleCode(category) {
+  const c = String(category || '').trim();
+  const m = c.match(/^(\d{1,3})\s*([A-Za-z])$/);
+  if (m) return {number: m[1], letter: m[2].toUpperCase(), label: ''};
+  if (/^\d{1,3}$/.test(c)) return {number: c, letter: '', label: ''};
+  return {number: '', letter: '', label: c};
+}
+const STYLE_XML_TYPE = {ale: 'Ale', lager: 'Lager', mixed: 'Mixed', cider: 'Cider', mead: 'Mead', other: 'Ale'};
+/** Bloc BeerXML <STYLE> : nom, code (CATEGORY_NUMBER + STYLE_LETTER) et guide, pour que BrewRecipes retrouve le style. */
+function beerXmlStyle(r, X) {
+  const st = recipeStyleRef(r);
+  const name = (st && st.name) || String(r.style || '').trim();
+  if (!name) return '';
+  const code = splitStyleCode(st ? st.category : '');
+  const srm = v => rnd(N(v) / 1.97, 1);
+  let inner = X('NAME', name) + X('VERSION', 1) + X('CATEGORY', code.label);
+  if (code.number) inner += X('CATEGORY_NUMBER', code.number);
+  if (code.letter) inner += X('STYLE_LETTER', code.letter);
+  if (st && st.guide) inner += X('STYLE_GUIDE', st.guide);
+  inner += X('TYPE', STYLE_XML_TYPE[st && st.type] || 'Ale');
+  if (st) {
+    inner += X('OG_MIN', st.ogMin) + X('OG_MAX', st.ogMax) + X('FG_MIN', st.fgMin) + X('FG_MAX', st.fgMax)
+      + X('IBU_MIN', st.ibuMin) + X('IBU_MAX', st.ibuMax)
+      + X('COLOR_MIN', srm(st.colorMin)) + X('COLOR_MAX', srm(st.colorMax))
+      + X('ABV_MIN', st.abvMin) + X('ABV_MAX', st.abvMax);
+    if (st.note) inner += X('NOTES', st.note);
+  }
+  return `<STYLE>${inner}</STYLE>`;
+}
+function beerJsonStyle(r) {
+  const st = recipeStyleRef(r);
+  const name = (st && st.name) || String(r.style || '').trim();
+  if (!name) return null;
+  const code = splitStyleCode(st ? st.category : '');
+  const range = (a, b, unit) => ({minimum: {value: rnd(N(a), 4), unit}, maximum: {value: rnd(N(b), 4), unit}});
+  const style = {name, type: (st && (st.type === 'mead' || st.type === 'cider')) ? st.type : 'beer', category: code.label || name};
+  if (st && st.guide) style.style_guide = st.guide;
+  if (code.number) style.category_number = Number(code.number);
+  if (code.letter) style.style_letter = code.letter;
+  if (st) {
+    style.original_gravity = range(st.ogMin, st.ogMax, 'sg');
+    style.final_gravity = range(st.fgMin, st.fgMax, 'sg');
+    style.international_bitterness_units = range(st.ibuMin, st.ibuMax, 'IBUs');
+    style.color = range(st.colorMin, st.colorMax, 'EBC');
+    style.alcohol_by_volume = range(st.abvMin, st.abvMax, '%');
+    if (st.note) style.notes = st.note;
+  }
+  return style;
+}
 function showExport(kind) {
   const r = R(), xml = kind === 'xml', txt = xml ? toBeerXML(r) : toBeerJSON(r), name = slug(r.name) + (xml ? '.xml' : '.json');
   dlgSave = null;
@@ -1968,7 +2303,9 @@ function toBeerXML(r) {
   const yeasts = r.yeast.map(x => { const y = lib('yeast', x.ref); return y && `<YEAST>${X('NAME', y.name)}${X('VERSION', 1)}${X('TYPE', y.type === 'lager' ? 'Lager' : 'Ale')}${X('FORM', y.form === 'liquid' ? 'Liquid' : 'Dry')}${X('AMOUNT', rnd(N(x.qty) * 0.0115, 4))}${X('AMOUNT_IS_WEIGHT', 'TRUE')}${X('ATTENUATION', y.att)}${X('MIN_TEMPERATURE', y.tmin)}${X('MAX_TEMPERATURE', y.tmax)}</YEAST>`; }).filter(Boolean);
   const steps = r.mash.map((s, i) => `<MASH_STEP>${X('NAME', s.name)}${X('VERSION', 1)}${X('TYPE', i === 0 ? 'Infusion' : {infusion: 'Infusion', direct: 'Temperature', decoction: 'Decoction'}[s.method || 'infusion'])}${X('STEP_TEMP', N(s.temp))}${X('STEP_TIME', N(s.time))}</MASH_STEP>`);
   const notes = (recipeStyleName(r) ? 'Style : ' + recipeStyleName(r) + '\n' : '') + r.notes;
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<RECIPES>\n<RECIPE>${X('VERSION', 1)}${X('NAME', r.name)}${X('TYPE', r.ferm.some(x => lib('ferm', x.ref)?.type === 'grain') ? 'All Grain' : 'Extract')}${X('BREWER', USER)}
+  const xmlDecl = '<' + '?xml version="1.0" encoding="UTF-8"?>';
+  return `${xmlDecl}\n<RECIPES>\n<RECIPE>${X('VERSION', 1)}${X('NAME', r.name)}${X('TYPE', r.ferm.some(x => lib('ferm', x.ref)?.type === 'grain') ? 'All Grain' : 'Extract')}${X('BREWER', USER)}
+${beerXmlStyle(r, X)}
 ${X('BATCH_SIZE', rnd(c.V, 2))}${X('BOIL_SIZE', rnd(c.preboil, 2))}${X('BOIL_TIME', P.boil)}${X('EFFICIENCY', rnd(c.effPct, 0))}
 ${sec('HOPS', hops)}${sec('FERMENTABLES', ferm)}${sec('MISCS', miscs)}${sec('YEASTS', yeasts)}
 <EQUIPMENT>${X('NAME', P.name)}${X('VERSION', 1)}${X('BOIL_SIZE', rnd(c.preboil, 2))}${X('BATCH_SIZE', rnd(c.V, 2))}${X('TRUB_CHILLER_LOSS', P.trub)}${X('EVAP_RATE', rnd(P.evap / c.preboil * 100, 2))}${X('BOIL_TIME', P.boil)}</EQUIPMENT>
@@ -1980,8 +2317,10 @@ ${r.ferment[0] ? X('PRIMARY_AGE', N(r.ferment[0].days)) + X('PRIMARY_TEMP', N(r.
 function toBeerJSON(r) {
   const c = calc(r), P = c.P, q = (v, unit) => ({value: rnd(+v, 4), unit});
   const use = {mash: 'add_to_mash', boil: 'add_to_boil', ferm: 'add_to_fermentation', bottle: 'add_to_package'};
+  const style = beerJsonStyle(r);
   const rec = {
     name: r.name, type: r.ferm.some(x => lib('ferm', x.ref)?.type === 'grain') ? 'all grain' : 'extract', author: USER,
+    ...(style ? {style} : {}),
     batch_size: q(c.V, 'l'), efficiency: {brewhouse: q(c.effPct, '%')},
     boil: {name: t('p_card_boil'), pre_boil_size: q(c.preboil, 'l'), boil_time: q(P.boil, 'min')},
     ingredients: {
@@ -2009,9 +2348,20 @@ function toBeerJSON(r) {
 (async function init() {
   try {
     const s = await api('session');
-    if (s.username) await enterApp(s.username);
-    else render();
-  } catch { render(); }
+    applySessionMeta(s);
+    if (s.username) {
+      try { await enterApp(s.username); }
+      catch (e) {
+        USER = D = null;
+        toast(e.message || t('err_load_data'));
+        render();
+      }
+    } else render();
+  } catch (e) {
+    USER = D = null;
+    toast(e.message || t('err_offline'));
+    render();
+  }
 })();
 </script>
 </body>
