@@ -570,4 +570,6 @@ return [
     'xn_disabled' => 'Disabled',
     'xn_toggle_note' => 'Disabled by default. Notes already entered stay saved if you turn the option off.',
     'xn_print_plus' => 'Print+',
+    'brew_print_aria' => 'Print without supplementary notes',
+    'brew_print_plus_aria' => 'Print with all supplementary notes',
 ];
