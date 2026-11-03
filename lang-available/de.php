@@ -540,4 +540,6 @@ return [
     'xn_disabled' => 'Deaktiviert',
     'xn_toggle_note' => 'Standardmäßig deaktiviert. Bereits eingegebene Notizen bleiben gespeichert, wenn Sie die Option deaktivieren.',
     'xn_print_plus' => 'Print+',
+    'brew_print_aria' => 'Drucken ohne Zusatznotizen',
+    'brew_print_plus_aria' => 'Drucken mit allen Zusatznotizen',
 ];

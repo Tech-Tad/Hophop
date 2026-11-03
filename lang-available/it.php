@@ -540,4 +540,6 @@ return [
     'xn_disabled' => 'Disattivato',
     'xn_toggle_note' => 'Disattivato per impostazione predefinita. Le note già inserite restano salvate se disattivi l\'opzione.',
     'xn_print_plus' => 'Print+',
+    'brew_print_aria' => 'Stampa senza note complementari',
+    'brew_print_plus_aria' => 'Stampa con tutte le note complementari',
 ];
